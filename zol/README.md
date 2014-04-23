@@ -19,7 +19,8 @@ to:
 %HOMEPATH%\Documents\WindowsPowerShell\Modules\vsphere_functions
 
 This script will do this step:
-https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/download_functions.ps1
+https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/download_functions.ps1
+You can just copy and paste it into a PowerShell console.
 
 Then get the PowerShell script:
 https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/create_zol_vm.ps1
