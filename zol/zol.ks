@@ -42,9 +42,8 @@ firewall --enabled --ssh --http --port=443:tcp
 # Use SHA-512 encrypted password instead of the usual UNIX crypt or md5
 authconfig --enableshadow --passalgo=sha512
 
-# Root password (generate the password with the "grub-crypt" command)
-# The password in the next line is: ZOL2014#
-rootpw --iscrypted $6$41pCKcSCROfKMg2y$NDXtnb1YmQ6Ocod2b7MkGu3UG.K.Mu/AiNYyv6DQUNXW3CiIT4Qhyj9aWS9BT9d9094cgpVX2ib9yBGxMZrPX/
+# Root password
+rootpw ZOL2014
 
 # SELinux configuration
 # See http://zfsonlinux.org/faq.html

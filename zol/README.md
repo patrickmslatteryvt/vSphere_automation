@@ -74,11 +74,11 @@ Press TAB to edit the default install switches.
 Here we'll point the VM at a web server that hosts the file https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/zol.ks to use as the kickstart file. I used an Nginx instance running on my DHCP server. Almost any HTTP server will work though, just make sure that you can download the .ks file without any errors. A default IIS 7 instance won't allow this for instance.
 
 ![Kickstart settings](images/10_kickstart.png?raw=true "Kickstart settings")
+
 *Note that my DHCP/HTTP server is called "kicker" and the kickstart file is in a subdirectory named "/ks"*
 
-
-**WHAT IF KICKSTART FILE CAN'T BE FOUND?**
-**NEED IMAGE**
+OS install in progress, the install should take only 5 minutes or so.
+**NEED: WHAT IF KICKSTART FILE CAN'T BE FOUND?**
 ![CentOS install progress](images/11_OS_install.png?raw=true "CentOS install progress")
 
 Once the OS install process is complete the installer will halt and will ask the user to reboot.
