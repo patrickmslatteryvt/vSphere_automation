@@ -27,3 +27,17 @@ https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/create_
 and edit the settings at the top of the file to reflect your vSphere environment.
 Save and run the script.
 Assuming you have no errors during the VM creation you will end up with a new vSphere VM ready to be booted up and have CentOS v6.5 installed on it.
+
+### References:
+
+ZOL FAQ
+http://zfsonlinux.org/faq.html
+
+A not so short guide to ZFS on Linux
+http://unicolet.blogspot.com/2013/03/a-not-so-short-guide-to-zfs-on-linux.html
+
+ZFS Cheatsheet
+http://www.datadisk.co.uk/html_docs/sun/sun_zfs_cs.htm
+
+ZFS Build: A friendly guide for building ZFS based SAN/NAS solutions
+http://www.zfsbuild.com/
