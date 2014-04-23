@@ -95,26 +95,24 @@ Run **ifconfig** to determine your IP address and then use this IP to SSH into t
 *Note that creating a DHCP reservation for your VM is the ideal way to set this up*
 
 ### Next steps:
-Install yum updates
-Install ZFS prereqs
-Install ZFS
-Create vdev file
-Create main storage pool
-Create ZIL and L2ARC
-Add pool scrub cron job
-ZFS tweaks
-Notes on what *not* to do.
+* Install yum updates
+* Install ZFS prereqs
+* Install ZFS
+* Remove unnecessary packages
+* Create vdev file
+* Create main storage pool
+* Create ZIL and L2ARC
+* Add pool scrub cron job
+* ZFS tweaks
+* Notes on what *not* to do.
 
 ### References:
+* [ZOL FAQ][1]
+* [A not so short guide to ZFS on Linux][2]
+* [ZFS Cheatsheet][3]
+* [ZFS Build][4]: A friendly guide for building ZFS based SAN/NAS solutions
 
-ZOL FAQ
-http://zfsonlinux.org/faq.html
-
-A not so short guide to ZFS on Linux
-http://unicolet.blogspot.com/2013/03/a-not-so-short-guide-to-zfs-on-linux.html
-
-ZFS Cheatsheet
-http://www.datadisk.co.uk/html_docs/sun/sun_zfs_cs.htm
-
-ZFS Build: A friendly guide for building ZFS based SAN/NAS solutions
-http://www.zfsbuild.com/
+[1]: http://zfsonlinux.org/faq.html "ZOL FAQ"
+[2]: http://unicolet.blogspot.com/2013/03/a-not-so-short-guide-to-zfs-on-linux.html "A not so short guide to ZFS on Linux"
+[3]: http://www.datadisk.co.uk/html_docs/sun/sun_zfs_cs.htm "ZFS Cheatsheet"
+[4]: http://www.zfsbuild.com/  "ZFS Build: A friendly guide for building ZFS based SAN/NAS solutions"
