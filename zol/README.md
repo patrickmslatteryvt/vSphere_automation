@@ -28,6 +28,22 @@ and edit the settings at the top of the file to reflect your vSphere environment
 Save and run the script.
 Assuming you have no errors during the VM creation you will end up with a new vSphere VM ready to be booted up and have CentOS v6.5 installed on it.
 
+![Provisioned VM in vSphere](/images/01_VM_provisioned.png)
+
+Next we'll start the VM and disable the unnecessary components such as the floppy, serial and parallel ports and set the correct boot order.
+I haven't figured out a way to do this programatically in vSphere so we'll have to do it manually. In a production environment you would have a template with these features disabled as your baseline.
+
+![Inital VM BIOS screen](/images/02_BIOS.png)
+![Disable floppy disk](/images/03_BIOS.png)
+![Location of extra IO devices](/images/04_BIOS.png)
+![Inital extra IO device screen](/images/05_BIOS.png)
+![After disabling extra IO devices](/images/06_BIOS.png)
+![Inital VM boot order screen](/images/07_BIOS.png)
+![Reordered VM boot order screen](/images/08_BIOS.png)
+![Save setup and exit](/images/09_BIOS.png)
+![Kickstart settings](/images/10_kickstart.png)
+
+
 ### References:
 
 ZOL FAQ
