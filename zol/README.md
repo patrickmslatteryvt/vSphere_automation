@@ -33,15 +33,15 @@ Assuming you have no errors during the VM creation you will end up with a new vS
 Next we'll start the VM and disable the unnecessary components such as the floppy, serial and parallel ports and set the correct boot order.
 I haven't figured out a way to do this programatically in vSphere so we'll have to do it manually. In a production environment you would have a template with these features disabled as your baseline.
 
-![Inital VM BIOS screen](/images/02_BIOS.png)
-![Disable floppy disk](/images/03_BIOS.png)
-![Location of extra IO devices](/images/04_BIOS.png)
-![Inital extra IO device screen](/images/05_BIOS.png)
-![After disabling extra IO devices](/images/06_BIOS.png)
-![Inital VM boot order screen](/images/07_BIOS.png)
-![Reordered VM boot order screen](/images/08_BIOS.png)
-![Save setup and exit](/images/09_BIOS.png)
-![Kickstart settings](/images/10_kickstart.png)
+![Inital VM BIOS screen](images/02_BIOS.png?raw=true)
+![Disable floppy disk](images/03_BIOS.png?raw=true)
+![Location of extra IO devices](images/04_BIOS.png?raw=true)
+![Inital extra IO device screen](images/05_BIOS.png?raw=true)
+![After disabling extra IO devices](images/06_BIOS.png?raw=true)
+![Inital VM boot order screen](images/07_BIOS.png?raw=true)
+![Reordered VM boot order screen](images/08_BIOS.png?raw=true)
+![Save setup and exit](images/09_BIOS.png?raw=true)
+![Kickstart settings](images/10_kickstart.png?raw=true)
 
 
 ### References:
