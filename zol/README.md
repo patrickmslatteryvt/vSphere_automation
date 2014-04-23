@@ -28,6 +28,7 @@ and edit the settings at the top of the file to reflect your vSphere environment
 Save and run the script.
 
 Assuming you have no errors during the VM creation you will end up with a new vSphere VM ready to be booted up and have CentOS v6.5 installed on it.
+
 ![Provisioned VM in vSphere](images/01_VM_provisioned.png?raw=true "Provisioned VM in vSphere")
 ![Provisioned VM properties](images/01_VM_properties.png?raw=true "Provisioned VM properties")
 
@@ -69,7 +70,7 @@ Save all of our BIOS changes and exit.
 
 Since the CentOS v6.5 ISO is already attached the VM will now boot to the CentOS install screen.
 
-Press TAB to edit the default install switches.
+Press **TAB** to edit the default install switches.
 
 Here we'll point the VM at a web server that hosts the file https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/zol.ks to use as the kickstart file. I used an Nginx instance running on my DHCP server. Almost any HTTP server will work though, just make sure that you can download the .ks file without any errors. A default IIS 7 instance won't allow this for instance.
 
@@ -92,6 +93,17 @@ Run **ifconfig** to determine your IP address and then use this IP to SSH into t
 ![Initial login and get IP address of VM](images/13_ifconfig.png?raw=true "Initial login and get IP address of VM")
 
 *Note that creating a DHCP reservation for your VM is the ideal way to set this up*
+
+### Next steps:
+Install yum updates
+Install ZFS prereqs
+Install ZFS
+Create vdev file
+Create main storage pool
+Create ZIL and L2ARC
+Add pool scrub cron job
+ZFS tweaks
+Notes on what *not* to do.
 
 ### References:
 
