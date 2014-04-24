@@ -383,8 +383,8 @@ no pools available
 As long as you get some zfs modules listed then it's working.
 
 * Remove any unnecessary packages
-* 
-Need to build RPMs as if we remove gcc for instance, spl and zfs will go with it.
+
+Need to build RPMs at some point as if we remove gcc for instance, spl and zfs will go with it.
 
 * Create vdev file
 
@@ -394,10 +394,28 @@ I wrote a quick and dirty Bash script that you can use to generate the vdev file
 ```Shell
 write_vdev_id_conf.sh
 ```
+After the `/etc/zfs/vdev_id.conf` file is in place we need to run the command:
+```Shell
+udevadm trigger
+```
+to actually create the `/dev/disk/by-vdev` directory: 
+```Shell
+[root@localhost ~]# ls -la /dev/disk/by-vdev/
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c1t0d0 -> ../../sdb
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c1t1d0 -> ../../sdc
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c1t2d0 -> ../../sdd
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c1t3d0 -> ../../sde
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c1t4d0 -> ../../sdf
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c1t5d0 -> ../../sdg
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c1t6d0 -> ../../sdh
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c1t8d0 -> ../../sdi
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c2t0d0 -> ../../sdj
+lrwxrwxrwx. 1 root root   9 Apr 24 17:12 c2t1d0 -> ../../sdk
+```
 If you don't use a vdev file you will almost certainly run into this error sooner or later:
 ```Shell
 [root@localhost ~]# zpool status -x
-  pool: pool
+  pool: mypool
  state: UNAVAIL
 status: One or more devices could not be used because the label is missing 
         or invalid.  There are insufficient replicas for the pool to continue
@@ -408,7 +426,7 @@ action: Destroy and re-create the pool from
   scan: none requested
 config:
         NAME        STATE     READ WRITE CKSUM
-        pool        UNAVAIL      0     0     0  insufficient replicas
+        mypool      UNAVAIL      0     0     0  insufficient replicas
           mirror-0  UNAVAIL      0     0     0  insufficient replicas
             sda     UNAVAIL      0     0     0
             sdb     FAULTED      0     0     0  corrupted data
@@ -425,6 +443,104 @@ config:
 ```
 
 * Create main storage pool
+
+At this point we can finally create our ZS file system and mount it.
+Here I'm going to create RAID 10 set from the 8 disks on HBA #1 and mount it at /srv, by default there is nothing in the /srv directory on a RHEL or CentOS system.
+```Shell 
+zpool create -f mypool mirror c1t0d0 c1t1d0 mirror c1t2d0 c1t3d0 mirror c1t4d0 c1t5d0 mirror c1t6d0 c1t8d0 -m /srv
+
+[root@localhost ~]# zpool status           
+  pool: mypool
+ state: ONLINE
+  scan: none requested
+config:
+        NAME        STATE     READ WRITE CKSUM
+        mypool      ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            c1t0d0  ONLINE       0     0     0
+            c1t1d0  ONLINE       0     0     0
+          mirror-1  ONLINE       0     0     0
+            c1t2d0  ONLINE       0     0     0
+            c1t3d0  ONLINE       0     0     0
+          mirror-2  ONLINE       0     0     0
+            c1t4d0  ONLINE       0     0     0
+            c1t5d0  ONLINE       0     0     0
+          mirror-3  ONLINE       0     0     0
+            c1t6d0  ONLINE       0     0     0
+            c1t8d0  ONLINE       0     0     0
+errors: No known data errors
+
+[root@localhost ~]# zpool iostat           
+               capacity     operations    bandwidth
+pool        alloc   free   read  write   read  write
+----------  -----  -----  -----  -----  -----  -----
+mypool       166K  39.7G      1     33  1.69K  34.8K
+```
+If we don't use the -f (force) switch the operation will typically error out due to the disks not being completly blank, it would seem that CentOS writes some sort of marker bytes to the disk during install.
+
+If I wanted a RAIDZ (RAID5 - single parity disk) array instead I'd run:
+```Shell
+zpool create -f mypool raidz c1t0d0 c1t1d0 c1t2d0 c1t3d0 c1t4d0 c1t5d0 c1t6d0 c1t8d0 -m /srv
+
+[root@localhost ~]# zpool status
+  pool: mypool
+ state: ONLINE
+  scan: none requested
+config:
+        NAME        STATE     READ WRITE CKSUM
+        mypool      ONLINE       0     0     0
+          raidz1-0  ONLINE       0     0     0
+            c1t0d0  ONLINE       0     0     0
+            c1t1d0  ONLINE       0     0     0
+            c1t2d0  ONLINE       0     0     0
+            c1t3d0  ONLINE       0     0     0
+            c1t4d0  ONLINE       0     0     0
+            c1t5d0  ONLINE       0     0     0
+            c1t6d0  ONLINE       0     0     0
+            c1t8d0  ONLINE       0     0     0
+errors: No known data errors
+
+[root@localhost ~]# zpool iostat
+               capacity     operations    bandwidth
+pool        alloc   free   read  write   read  write
+----------  -----  -----  -----  -----  -----  -----
+mypool       225K  79.5G      0      4    237  3.92K
+```
+If I wanted a RAIDZ2 (RAID6 - dual parity disks) array I'd run:
+```Shell
+zpool create -f mypool raidz2 c1t0d0 c1t1d0 c1t2d0 c1t3d0 c1t4d0 c1t5d0 c1t6d0 c1t8d0 -m /srv
+
+[root@localhost ~]# zpool status           
+  pool: mypool
+ state: ONLINE
+  scan: none requested
+config:
+        NAME        STATE     READ WRITE CKSUM
+        mypool      ONLINE       0     0     0
+          raidz2-0  ONLINE       0     0     0
+            c1t0d0  ONLINE       0     0     0
+            c1t1d0  ONLINE       0     0     0
+            c1t2d0  ONLINE       0     0     0
+            c1t3d0  ONLINE       0     0     0
+            c1t4d0  ONLINE       0     0     0
+            c1t5d0  ONLINE       0     0     0
+            c1t6d0  ONLINE       0     0     0
+            c1t8d0  ONLINE       0     0     0
+errors: No known data errors
+
+[root@localhost ~]# zpool iostat           
+               capacity     operations    bandwidth
+pool        alloc   free   read  write   read  write
+----------  -----  -----  -----  -----  -----  -----
+mypool       346K  79.5G      2     41  2.38K  40.3K
+```
+I'm not sure why a RAIDZ2 pool has the same amount of free space listed as a RAIDZ pool. As I understood it the RAIDZ2 pool should have been at least one disks worth of space less.
+
+Hint: To completely remove a pool use the command:
+```Shell
+zpool destroy -f mypool
+```
+ 
 * Create ZIL and L2ARC
 * Add pool scrub cron job
 * ZFS tweaks
