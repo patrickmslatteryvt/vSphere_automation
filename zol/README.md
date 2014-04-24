@@ -541,7 +541,14 @@ Hint: To completely remove a pool use the command:
 zpool destroy -f mypool
 ```
  
-* Create ZIL and L2ARC
+* Create the ZIL and L2ARC
+
+For this test system I'm going to share a pair of virtual 8GB SSDs between the ZIL and the L2ARC. This isn't a configuration that you would ever want to use in a production environment as the ZIL and L2ARC have very different use cases.
+Ideally you want a write intensive, very low latency device as the ZIL, the [ZeusRAM][5] drive is an ideal enterprise level production device for a ZIL.
+For the L2ARC, a read intensive, high IOPS device such as one one of the Intel DC SSDs is ideal.
+For our test purposes though a dedicated set of SSDs is unnecessary. ZFS will allow us to place the ZIL and L2ARC on different partitions of the same SSD devices. In this configuration we'll be mirroring the ZIL and striping the L2ARC. Again this isn't a configuration that you would ever want to use in a production environment. I've seen varying opinions on the benefit of mirroring the ZIL but the consensus seems to come down of the side of mirroring the ZIL is a best practice. The ZIL is essentially a 10 second write cache for all disk activity so that ZFS can delay and re-order writes to the hard disks to make any writes as fast as possible. AFAIK the contents of the ZIL are in RAM as well so losing the ZIL isn't critical unless you have a power failure as well. In that case you could possibly have a serious problem. 
+The L2ARC is a read cache and if it goes offline it will simply be bypassed. Not having it available simply means having only the primary ARC cache in RAM to work from. Since an SSD is about two orders of magnitude faster than a hard disk (25µs SSD vs. 5ms HDD) you want to cache as much as possible on the SSD, particularly if you don't have vast amount of RAM to allocate to the ARC cache.
+ 
 * Add pool scrub cron job
 * ZFS tweaks
 * Notes on what *not* to do.
@@ -558,3 +565,4 @@ zpool destroy -f mypool
 [2]: http://unicolet.blogspot.com/2013/03/a-not-so-short-guide-to-zfs-on-linux.html "A not so short guide to ZFS on Linux"
 [3]: http://www.datadisk.co.uk/html_docs/sun/sun_zfs_cs.htm "ZFS Cheatsheet"
 [4]: http://www.zfsbuild.com/  "ZFS Build: A friendly guide for building ZFS based SAN/NAS solutions"
+[5]: http://www.stec-inc.com/wp-content/themes/twentytwelve/ajax/viewer.php?fid=50 "ZeusRAM"
