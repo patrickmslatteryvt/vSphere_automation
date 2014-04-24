@@ -625,7 +625,29 @@ errors: No known data errors
 ```
 
 
-* Add pool scrub cron job
+* Add a zpool scrub cron job
+
+The simplest way to check the data integrity of the ZFS filesystem is to initiate an explicit scrubbing of all data within the pool. This operation traverses all the data in the pool once and verifies that all blocks can be read.
+Running a scrub weekly is highly recommended. Here is a simple Bash script to write a **new** crontab file for the root user. (It should go without saying that you should not use this on a production system!)
+
+```Shell
+TMP_CRONTAB=$(mktemp) || { echo "Failed to create temp file"; exit 1; }
+echo  '# Example of job definition'>${TMP_CRONTAB}
+echo  '# .---------------- minute (0 - 59)'>>${TMP_CRONTAB}
+echo  '# |  .------------- hour (0 - 23)'>>${TMP_CRONTAB}
+echo  '# |  |  .---------- day of month (1 - 31)'>>${TMP_CRONTAB}
+echo  '# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...'>>${TMP_CRONTAB}
+echo  '# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat'>>${TMP_CRONTAB}
+echo  '# |  |  |  |  |'>>${TMP_CRONTAB}
+echo  '# *  *  *  *  * user-name command to be executed'>>${TMP_CRONTAB}
+echo  '#':>>${TMP_CRONTAB}
+echo  '# Start ZFS scrub at 3AM every Saturday night':>>${TMP_CRONTAB}
+echo  '0 3 * * sat /sbin/zpool scrub mypool':>>${TMP_CRONTAB}
+crontab -u root ${TMP_CRONTAB}
+rm -f ${TMP_CRONTAB}
+```
+For more information see: [Checking ZFS File System Integrity][6]
+
 * ZFS tweaks
 * Notes on what *not* to do.
 * Future stuff
@@ -642,3 +664,4 @@ errors: No known data errors
 [3]: http://www.datadisk.co.uk/html_docs/sun/sun_zfs_cs.htm "ZFS Cheatsheet"
 [4]: http://www.zfsbuild.com/  "ZFS Build: A friendly guide for building ZFS based SAN/NAS solutions"
 [5]: http://www.stec-inc.com/wp-content/themes/twentytwelve/ajax/viewer.php?fid=50 "ZeusRAM"
+[6]: http://docs.oracle.com/cd/E23823_01/html/819-5461/gbbwa.html "Oracle Solaris ZFS Administration Guide - Checking ZFS File System Integrity"
