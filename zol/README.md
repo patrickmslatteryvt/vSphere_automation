@@ -649,6 +649,26 @@ rm -f ${TMP_CRONTAB}
 For more information see: [Checking ZFS File System Integrity][6]
 
 * ZFS tweaks
+
+In ZFS data integrity comes first, speed is secondary. That said it's speed in a properly designed system is very impressive. There isn't much need to tweak it out of the box.
+That said you can get a list of the available properties by running:
+```Shell
+zfs get
+```
+One property that I typically turn off is file access update times. 
+zfs set atime=off mypool
+
+For more information see: [ZFS Evil Tuning Guide][7]
+
+* Automatic snapshots
+* 
+https://github.com/zfsonlinux/zfs-auto-snapshot
+
+```Shell
+wget -O /usr/local/sbin/zfs-auto-snapshot.sh https://raw.github.com/zfsonlinux/zfs-auto-snapshot/master/src/zfs-auto-snapshot.sh
+chmod +x /usr/local/sbin/zfs-auto-snapshot.sh
+```
+
 * Notes on what *not* to do.
 * Future stuff
 	* Make proper RPMs so we don't have to have the compilers etc. on each machine
@@ -658,6 +678,8 @@ For more information see: [Checking ZFS File System Integrity][6]
 * [A not so short guide to ZFS on Linux][2]
 * [ZFS Cheatsheet][3]
 * [ZFS Build][4]: A friendly guide for building ZFS based SAN/NAS solutions
+* [ZFS Evil Tuning Guide][7]
+* [Oracle Solaris ZFS Administration Guide][8]
 
 [1]: http://zfsonlinux.org/faq.html "ZOL FAQ"
 [2]: http://unicolet.blogspot.com/2013/03/a-not-so-short-guide-to-zfs-on-linux.html "A not so short guide to ZFS on Linux"
@@ -665,3 +687,9 @@ For more information see: [Checking ZFS File System Integrity][6]
 [4]: http://www.zfsbuild.com/  "ZFS Build: A friendly guide for building ZFS based SAN/NAS solutions"
 [5]: http://www.stec-inc.com/wp-content/themes/twentytwelve/ajax/viewer.php?fid=50 "ZeusRAM"
 [6]: http://docs.oracle.com/cd/E23823_01/html/819-5461/gbbwa.html "Oracle Solaris ZFS Administration Guide - Checking ZFS File System Integrity"
+[7]: http://www.solarisinternals.com/wiki/index.php/ZFS_Evil_Tuning_Guide "ZFS Evil Tuning Guide"
+[8]: http://docs.oracle.com/cd/E23823_01/html/819-5461/preface-1.html#scrolltoc "Oracle Solaris ZFS Administration Guide"
+
+http://constantin.glez.de/blog/2010/04/ten-ways-easily-improve-oracle-solaris-zfs-filesystem-performance
+http://rudd-o.com/linux-and-free-software/tip-letting-your-zfs-pool-sleep
+http://bernaerts.dyndns.org/linux/75-debian/279-debian-wheezy-zfs-raidz-pool
