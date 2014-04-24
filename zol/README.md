@@ -101,14 +101,16 @@ Run **ifconfig** to determine your IP address and then use this IP to SSH into t
 
 ### Next steps:
 * Install yum updates
-
-	`yum update -y`
+```Shell
+yum update -y
+```
 * Install the openssh client which is necessary for rsync (NOTE: Should add this to the kickstart file instead)
-
-	`yum install -y openssh-clients`
+```Shell
+yum install -y openssh-clients
+```
 * Install VMware Tools
 
-```
+```Shell
 rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub
 rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub
 echo "[vmware-tools]">/etc/yum.repos.d/vmware-tools.repo
@@ -122,16 +124,19 @@ yum install -y vmware-tools-esx-kmods.x86_64 vmware-tools-esx-nox.x86_64
 Please note that installing the VMware Tools can take several minutes.
 * Take VM snapshot
 
-Now that the VMware Tools are installed we can remotely power-off the VM via PowerCLI
+Now that the VMware Tools are installed we can remotely power-off the VM via PowerCLI so that we can take an at-rest snapshot that we can use to quickly restore to during our testing.
 
-```Snapshot-VM -VM "ZOL_CentOS"```
+```PowerShell
+Snapshot-VM -VM "ZOL_CentOS"
+```
    
 * Install ZFS prerequisites
+
 * Install ZFS
 
-```
-http://zfsonlinux.org/epel.html
-yum localinstall --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release-1-3.el6.noarch.rpm
+From: http://zfsonlinux.org/epel.html
+```Shell
+yum localinstall -y --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release-1-3.el6.noarch.rpm
 yum install -y zfs
 ```
 
@@ -142,6 +147,8 @@ yum install -y zfs
 * Add pool scrub cron job
 * ZFS tweaks
 * Notes on what *not* to do.
+* Future stuff
+	* Make proper RPMs so we don't have to have the compilers etc. on each machine
 
 ### References:
 * [ZOL FAQ][1]
