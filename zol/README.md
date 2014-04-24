@@ -139,6 +139,233 @@ From: http://zfsonlinux.org/epel.html
 yum localinstall -y --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release-1-3.el6.noarch.rpm
 yum install -y zfs
 ```
+I've found this install errors out on not finding a kernel at times. You should get output something like this:
+```Shell
+[root@localhost ~]# yum install -y zfs
+Loaded plugins: fastestmirror, priorities
+Loading mirror speeds from cached hostfile
+ * base: mirrors.einstein.yu.edu
+ * extras: mirror.trouble-free.net
+ * updates: mirrors.advancedhosters.com
+zfs                                                                                                                  | 2.9 kB     00:00     
+zfs/primary_db                                                                                                       |  26 kB     00:00     
+Setting up Install Process
+Resolving Dependencies
+--> Running transaction check
+---> Package zfs.x86_64 0:0.6.2-1.el6 will be installed
+--> Processing Dependency: spl = 0.6.2 for package: zfs-0.6.2-1.el6.x86_64
+--> Processing Dependency: zfs-kmod >= 0.6.2 for package: zfs-0.6.2-1.el6.x86_64
+--> Running transaction check
+---> Package spl.x86_64 0:0.6.2-1.el6 will be installed
+--> Processing Dependency: spl-kmod >= 0.6.2 for package: spl-0.6.2-1.el6.x86_64
+---> Package zfs-dkms.noarch 0:0.6.2-1.el6 will be installed
+--> Processing Dependency: dkms = 2.2.0.3-14.zfs1.el6 for package: zfs-dkms-0.6.2-1.el6.noarch
+--> Processing Dependency: kernel-devel for package: zfs-dkms-0.6.2-1.el6.noarch
+--> Processing Dependency: gcc for package: zfs-dkms-0.6.2-1.el6.noarch
+--> Running transaction check
+---> Package dkms.noarch 0:2.2.0.3-14.zfs1.el6 will be installed
+---> Package gcc.x86_64 0:4.4.7-4.el6 will be installed
+--> Processing Dependency: libgomp = 4.4.7-4.el6 for package: gcc-4.4.7-4.el6.x86_64
+--> Processing Dependency: cpp = 4.4.7-4.el6 for package: gcc-4.4.7-4.el6.x86_64
+--> Processing Dependency: glibc-devel >= 2.2.90-12 for package: gcc-4.4.7-4.el6.x86_64
+--> Processing Dependency: cloog-ppl >= 0.15 for package: gcc-4.4.7-4.el6.x86_64
+--> Processing Dependency: libgomp.so.1()(64bit) for package: gcc-4.4.7-4.el6.x86_64
+---> Package kernel-devel.x86_64 0:2.6.32-431.11.2.el6 will be installed
+---> Package spl-dkms.noarch 0:0.6.2-1.el6 will be installed
+--> Running transaction check
+---> Package cloog-ppl.x86_64 0:0.15.7-1.2.el6 will be installed
+--> Processing Dependency: libppl_c.so.2()(64bit) for package: cloog-ppl-0.15.7-1.2.el6.x86_64
+--> Processing Dependency: libppl.so.7()(64bit) for package: cloog-ppl-0.15.7-1.2.el6.x86_64
+---> Package cpp.x86_64 0:4.4.7-4.el6 will be installed
+--> Processing Dependency: libmpfr.so.1()(64bit) for package: cpp-4.4.7-4.el6.x86_64
+---> Package glibc-devel.x86_64 0:2.12-1.132.el6 will be installed
+--> Processing Dependency: glibc-headers = 2.12-1.132.el6 for package: glibc-devel-2.12-1.132.el6.x86_64
+--> Processing Dependency: glibc-headers for package: glibc-devel-2.12-1.132.el6.x86_64
+---> Package libgomp.x86_64 0:4.4.7-4.el6 will be installed
+--> Running transaction check
+---> Package glibc-headers.x86_64 0:2.12-1.132.el6 will be installed
+--> Processing Dependency: kernel-headers >= 2.2.1 for package: glibc-headers-2.12-1.132.el6.x86_64
+--> Processing Dependency: kernel-headers for package: glibc-headers-2.12-1.132.el6.x86_64
+---> Package mpfr.x86_64 0:2.4.1-6.el6 will be installed
+---> Package ppl.x86_64 0:0.10.2-11.el6 will be installed
+--> Running transaction check
+---> Package kernel-headers.x86_64 0:2.6.32-431.11.2.el6 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+============================================================================================================================================
+ Package                            Arch                       Version                                    Repository                   Size
+============================================================================================================================================
+Installing:
+ zfs                                x86_64                     0.6.2-1.el6                                zfs                         758 k
+Installing for dependencies:
+ cloog-ppl                          x86_64                     0.15.7-1.2.el6                             base                         93 k
+ cpp                                x86_64                     4.4.7-4.el6                                base                        3.7 M
+ dkms                               noarch                     2.2.0.3-14.zfs1.el6                        zfs                          74 k
+ gcc                                x86_64                     4.4.7-4.el6                                base                         10 M
+ glibc-devel                        x86_64                     2.12-1.132.el6                             base                        978 k
+ glibc-headers                      x86_64                     2.12-1.132.el6                             base                        608 k
+ kernel-devel                       x86_64                     2.6.32-431.11.2.el6                        updates                     8.8 M
+ kernel-headers                     x86_64                     2.6.32-431.11.2.el6                        updates                     2.8 M
+ libgomp                            x86_64                     4.4.7-4.el6                                base                        118 k
+ mpfr                               x86_64                     2.4.1-6.el6                                base                        157 k
+ ppl                                x86_64                     0.10.2-11.el6                              base                        1.3 M
+ spl                                x86_64                     0.6.2-1.el6                                zfs                          21 k
+ spl-dkms                           noarch                     0.6.2-1.el6                                zfs                         499 k
+ zfs-dkms                           noarch                     0.6.2-1.el6                                zfs                         1.7 M
+
+Transaction Summary
+============================================================================================================================================
+Install      15 Package(s)
+
+Total download size: 32 M
+Installed size: 78 M
+Downloading Packages:
+(1/15): cloog-ppl-0.15.7-1.2.el6.x86_64.rpm                                                                          |  93 kB     00:00     
+(2/15): cpp-4.4.7-4.el6.x86_64.rpm                                                                                   | 3.7 MB     00:00     
+(3/15): dkms-2.2.0.3-14.zfs1.el6.noarch.rpm                                                                          |  74 kB     00:00     
+(4/15): gcc-4.4.7-4.el6.x86_64.rpm                                                                                   |  10 MB     00:01     
+(5/15): glibc-devel-2.12-1.132.el6.x86_64.rpm                                                                        | 978 kB     00:00     
+(6/15): glibc-headers-2.12-1.132.el6.x86_64.rpm                                                                      | 608 kB     00:00     
+(7/15): kernel-devel-2.6.32-431.11.2.el6.x86_64.rpm                                                                  | 8.8 MB     00:00     
+(8/15): kernel-headers-2.6.32-431.11.2.el6.x86_64.rpm                                                                | 2.8 MB     00:00     
+(9/15): libgomp-4.4.7-4.el6.x86_64.rpm                                                                               | 118 kB     00:00     
+(10/15): mpfr-2.4.1-6.el6.x86_64.rpm                                                                                 | 157 kB     00:00     
+(11/15): ppl-0.10.2-11.el6.x86_64.rpm                                                                                | 1.3 MB     00:00     
+(12/15): spl-0.6.2-1.el6.x86_64.rpm                                                                                  |  21 kB     00:00     
+(13/15): spl-dkms-0.6.2-1.el6.noarch.rpm                                                                             | 499 kB     00:00     
+(14/15): zfs-0.6.2-1.el6.x86_64.rpm                                                                                  | 758 kB     00:00     
+(15/15): zfs-dkms-0.6.2-1.el6.noarch.rpm                                                                             | 1.7 MB     00:00     
+--------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                       3.6 MB/s |  32 MB     00:08     
+Running rpm_check_debug
+Running Transaction Test
+Transaction Test Succeeded
+Running Transaction
+  Installing : kernel-devel-2.6.32-431.11.2.el6.x86_64                                                                                 1/15 
+  Installing : ppl-0.10.2-11.el6.x86_64                                                                                                2/15 
+  Installing : cloog-ppl-0.15.7-1.2.el6.x86_64                                                                                         3/15 
+  Installing : mpfr-2.4.1-6.el6.x86_64                                                                                                 4/15 
+  Installing : cpp-4.4.7-4.el6.x86_64                                                                                                  5/15 
+  Installing : libgomp-4.4.7-4.el6.x86_64                                                                                              6/15 
+  Installing : kernel-headers-2.6.32-431.11.2.el6.x86_64                                                                               7/15 
+  Installing : glibc-headers-2.12-1.132.el6.x86_64                                                                                     8/15 
+  Installing : glibc-devel-2.12-1.132.el6.x86_64                                                                                       9/15 
+  Installing : gcc-4.4.7-4.el6.x86_64                                                                                                 10/15 
+  Installing : dkms-2.2.0.3-14.zfs1.el6.noarch                                                                                        11/15 
+  Installing : spl-dkms-0.6.2-1.el6.noarch                                                                                            12/15 
+Loading new spl-0.6.2 DKMS files...
+First Installation: checking all kernels...
+Building only for 2.6.32-431.11.2.el6.x86_64
+Building initial module for 2.6.32-431.11.2.el6.x86_64
+Done.
+
+spl:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/2.6.32-431.11.2.el6.x86_64/extra/
+
+splat.ko:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/2.6.32-431.11.2.el6.x86_64/extra/
+Adding any weak-modules
+
+Running the post_install script:
+
+depmod...
+
+DKMS: install completed.
+  Installing : zfs-dkms-0.6.2-1.el6.noarch                                                                                            13/15 
+Loading new zfs-0.6.2 DKMS files...
+First Installation: checking all kernels...
+Building only for 2.6.32-431.11.2.el6.x86_64
+Building initial module for 2.6.32-431.11.2.el6.x86_64
+Done.
+
+zavl:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/2.6.32-431.11.2.el6.x86_64/extra/
+
+znvpair.ko:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/2.6.32-431.11.2.el6.x86_64/extra/
+
+zunicode.ko:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/2.6.32-431.11.2.el6.x86_64/extra/
+
+zcommon.ko:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/2.6.32-431.11.2.el6.x86_64/extra/
+
+zfs.ko:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/2.6.32-431.11.2.el6.x86_64/extra/
+
+zpios.ko:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/2.6.32-431.11.2.el6.x86_64/extra/
+Adding any weak-modules
+
+Running the post_install script:
+
+depmod...
+
+DKMS: install completed.
+  Installing : spl-0.6.2-1.el6.x86_64                                                                                                 14/15 
+  Installing : zfs-0.6.2-1.el6.x86_64                                                                                                 15/15 
+  Verifying  : zfs-dkms-0.6.2-1.el6.noarch                                                                                             1/15 
+  Verifying  : kernel-headers-2.6.32-431.11.2.el6.x86_64                                                                               2/15 
+  Verifying  : spl-0.6.2-1.el6.x86_64                                                                                                  3/15 
+  Verifying  : cpp-4.4.7-4.el6.x86_64                                                                                                  4/15 
+  Verifying  : glibc-devel-2.12-1.132.el6.x86_64                                                                                       5/15 
+  Verifying  : zfs-0.6.2-1.el6.x86_64                                                                                                  6/15 
+  Verifying  : kernel-devel-2.6.32-431.11.2.el6.x86_64                                                                                 7/15 
+  Verifying  : libgomp-4.4.7-4.el6.x86_64                                                                                              8/15 
+  Verifying  : mpfr-2.4.1-6.el6.x86_64                                                                                                 9/15 
+  Verifying  : spl-dkms-0.6.2-1.el6.noarch                                                                                            10/15 
+  Verifying  : dkms-2.2.0.3-14.zfs1.el6.noarch                                                                                        11/15 
+  Verifying  : gcc-4.4.7-4.el6.x86_64                                                                                                 12/15 
+  Verifying  : ppl-0.10.2-11.el6.x86_64                                                                                               13/15 
+  Verifying  : cloog-ppl-0.15.7-1.2.el6.x86_64                                                                                        14/15 
+  Verifying  : glibc-headers-2.12-1.132.el6.x86_64                                                                                    15/15 
+
+Installed:
+  zfs.x86_64 0:0.6.2-1.el6                                                                                                                  
+
+Dependency Installed:
+  cloog-ppl.x86_64 0:0.15.7-1.2.el6              cpp.x86_64 0:4.4.7-4.el6                         dkms.noarch 0:2.2.0.3-14.zfs1.el6         
+  gcc.x86_64 0:4.4.7-4.el6                       glibc-devel.x86_64 0:2.12-1.132.el6              glibc-headers.x86_64 0:2.12-1.132.el6     
+  kernel-devel.x86_64 0:2.6.32-431.11.2.el6      kernel-headers.x86_64 0:2.6.32-431.11.2.el6      libgomp.x86_64 0:4.4.7-4.el6              
+  mpfr.x86_64 0:2.4.1-6.el6                      ppl.x86_64 0:0.10.2-11.el6                       spl.x86_64 0:0.6.2-1.el6                  
+  spl-dkms.noarch 0:0.6.2-1.el6                  zfs-dkms.noarch 0:0.6.2-1.el6                   
+
+Complete!
+```
 
 * Remove any unnecessary packages
 * Create vdev file
