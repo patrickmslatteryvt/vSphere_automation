@@ -108,28 +108,32 @@ Run **ifconfig** to determine your IP address and then use this IP to SSH into t
 	`yum install -y openssh-clients`
 * Install VMware Tools
 
-	rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub
-	rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub
-	echo "[vmware-tools]">/etc/yum.repos.d/vmware-tools.repo
-	echo "name=VMware Tools">>/etc/yum.repos.d/vmware-tools.repo
-	echo "baseurl=http://packages.vmware.com/tools/esx/latest/rhel6/x86_64">>/etc/yum.repos.d/vmware-tools.repo
-	echo "enabled=1">>/etc/yum.repos.d/vmware-tools.repo
-	echo "gpgcheck=1">>/etc/yum.repos.d/vmware-tools.repo
-	yum install -y vmware-tools-esx-kmods.x86_64 vmware-tools-esx-nox.x86_64
+```
+rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub
+rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub
+echo "[vmware-tools]">/etc/yum.repos.d/vmware-tools.repo
+echo "name=VMware Tools">>/etc/yum.repos.d/vmware-tools.repo
+echo "baseurl=http://packages.vmware.com/tools/esx/latest/rhel6/x86_64">>/etc/yum.repos.d/vmware-tools.repo
+echo "enabled=1">>/etc/yum.repos.d/vmware-tools.repo
+echo "gpgcheck=1">>/etc/yum.repos.d/vmware-tools.repo
+yum install -y vmware-tools-esx-kmods.x86_64 vmware-tools-esx-nox.x86_64
+```
 
 Please note that installing the VMware Tools can take several minutes.
 * Take VM snapshot
 
 Now that the VMware Tools are installed we can remotely power-off the VM via PowerCLI
 
-	Snapshot-VM -VM "ZOL_CentOS"
+```Snapshot-VM -VM "ZOL_CentOS"```
    
 * Install ZFS prerequisites
 * Install ZFS
 
-    `http://zfsonlinux.org/epel.html`
-    `yum localinstall --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release-1-3.el6.noarch.rpm`  
-    `yum install -y zfs`
+```
+http://zfsonlinux.org/epel.html
+yum localinstall --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release-1-3.el6.noarch.rpm
+yum install -y zfs
+```
 
 * Remove any unnecessary packages
 * Create vdev file
