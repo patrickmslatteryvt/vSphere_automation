@@ -366,9 +366,64 @@ Dependency Installed:
 
 Complete!
 ```
+* Test
+To see if ZFS is working run:
+```Shell
+[root@localhost ~]# lsmod|grep zfs
+zfs                  1152935  0 
+zcommon                44698  1 zfs
+znvpair                80460  2 zfs,zcommon
+zavl                    6925  1 zfs
+zunicode              323159  1 zfs
+spl                   260832  5 zfs,zcommon,znvpair,zavl,zunicode
+
+[root@localhost ~]# zpool status
+no pools available
+```
+As long as you get some zfs modules listed then it's working.
 
 * Remove any unnecessary packages
+* 
+Need to build RPMs as if we remove gcc for instance, spl and zfs will go with it.
+
 * Create vdev file
+
+If you more than a few (2?) disks allocated to your ZFS pool it's highly recommended to use a location to disk ID mapping file so that your ZFS pool will still work if you decide to pull out all the disks and put them back in again in a slightly different order.
+There are some sample mapping files available in the /etc/zfs/ directory.
+I wrote a quick and dirty Bash script that you can use to generate the vdev file.
+```Shell
+write_vdev_id_conf.sh
+```
+If you don't use a vdev file you will almost certainly run into this error sooner or later:
+```Shell
+[root@localhost ~]# zpool status -x
+  pool: pool
+ state: UNAVAIL
+status: One or more devices could not be used because the label is missing 
+        or invalid.  There are insufficient replicas for the pool to continue
+        functioning.
+action: Destroy and re-create the pool from
+        a backup source.
+   see: http://zfsonlinux.org/msg/ZFS-8000-5E
+  scan: none requested
+config:
+        NAME        STATE     READ WRITE CKSUM
+        pool        UNAVAIL      0     0     0  insufficient replicas
+          mirror-0  UNAVAIL      0     0     0  insufficient replicas
+            sda     UNAVAIL      0     0     0
+            sdb     FAULTED      0     0     0  corrupted data
+            sdc     FAULTED      0     0     0  corrupted data
+            sdd     FAULTED      0     0     0  corrupted data
+            sde     FAULTED      0     0     0  corrupted data
+            sdf     FAULTED      0     0     0  corrupted data
+            sdg     FAULTED      0     0     0  corrupted data
+            sdh     FAULTED      0     0     0  corrupted data
+        logs
+          mirror-1  UNAVAIL      0     0     0  insufficient replicas
+            sdi1    FAULTED      0     0     0  corrupted data
+            sdj1    FAULTED      0     0     0  corrupted data
+```
+
 * Create main storage pool
 * Create ZIL and L2ARC
 * Add pool scrub cron job
