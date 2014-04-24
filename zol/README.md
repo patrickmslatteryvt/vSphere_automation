@@ -2,10 +2,11 @@ ZFS on Linux (ZOL)
 ==================
 
 **NOTE:
-I absolutly do not recommend using ZFS as a guest filesystem inside a virtual infrastructure of any type for anything other than test purposes.
+I absolutely do not recommend using ZFS as a guest file-system inside a virtual infrastructure of any type for anything other than test purposes.
 ZFS belongs running directly on the hardware at the host OS or hypervisor level.**
 
-Purpose:
+**Purpose:**
+
 Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for testing purposes.
 
 ##### Step 1:
@@ -14,16 +15,20 @@ Create a vSphere VM to test our ZOL setup in. Requires a vSphere infrastructure 
 I tested with vSphere v5.5 on my server and with PowerCLI v5.5 and PowerGUI v3.8 on my client.
 
 Copy the contents of:
-https://github.com/patrickmslatteryvt/vSphere_automation/tree/master/vsphere_functions
-to:
-%HOMEPATH%\Documents\WindowsPowerShell\Modules\vsphere_functions
 
-This script will do this step:
-https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/download_functions.ps1
-You can just copy and paste it into a PowerShell console.
+    https://github.com/patrickmslatteryvt/vSphere_automation/tree/master/vsphere_functions
+to:
+
+    %HOMEPATH%\Documents\WindowsPowerShell\Modules\vsphere_functions
+
+The following script will do the step above:
+
+    https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/download_functions.ps1
+You can just copy and paste its contents into a PowerShell console and it will download the PowerShell module into the correct place on your system.
 
 Then get the PowerShell script:
-https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/create_zol_vm.ps1
+
+    https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/create_zol_vm.ps1
 and edit the settings at the top of the file to reflect your vSphere environment.
 Save and run the script.
 
@@ -43,13 +48,13 @@ First we need to disable the floppy disk.
 
 ![Disable floppy disk](images/03_BIOS.png?raw=true "Disable floppy disk")
 
-Next we need to go to the location of the extra IO devices. Press ENTER to go to the submenu.
+Next we need to go to the location of the extra IO devices. Press ENTER to go to the sub-menu.
 
 ![Location of extra IO devices](images/04_BIOS.png?raw=true "Location of extra IO devices")
 
 Here we see that the serial ports, parallel port and floppy controller are all enabled by default. We have little use for these devices in a modern VM.
 
-![Inital extra IO device screen](images/05_BIOS.png?raw=true "Inital extra IO device screen")
+![Initial extra IO device screen](images/05_BIOS.png?raw=true "Initial extra IO device screen")
 
 After disabling extra IO devices.
 
@@ -57,7 +62,7 @@ After disabling extra IO devices.
 
 Next we move on the the VM boot order screen, the defaults won't allow us to install Linux without some rapid button presses during the VM boot process.
 
-![Inital VM boot order screen](images/07_BIOS.png?raw=true "Inital VM boot order screen")
+![Initial VM boot order screen](images/07_BIOS.png?raw=true "Initial VM boot order screen")
 
 After reordering it will be much easier to install an OS from an ISO.
 
@@ -76,7 +81,7 @@ Here we'll point the VM at a web server that hosts the file https://github.com/p
 
 ![Kickstart settings](images/10_kickstart.png?raw=true "Kickstart settings")
 
-*Note that my DHCP/HTTP server is called "kicker" and the kickstart file is in a subdirectory named "/ks"*
+*Note that my DHCP/HTTP server is called "kicker" and the kickstart file is in a sub-directory named "/ks"*
 
 OS install in progress, the install should take only 5 minutes or so.
 **NEED: WHAT IF KICKSTART FILE CAN'T BE FOUND?**
@@ -96,9 +101,37 @@ Run **ifconfig** to determine your IP address and then use this IP to SSH into t
 
 ### Next steps:
 * Install yum updates
-* Install ZFS prereqs
+
+	`yum update -y`
+* Install the openssh client which is necessary for rsync (NOTE: Should add this to the kickstart file instead)
+
+	`yum install -y openssh-clients`
+* Install VMware Tools
+
+	rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub
+	rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub
+	echo "[vmware-tools]">/etc/yum.repos.d/vmware-tools.repo
+	echo "name=VMware Tools">>/etc/yum.repos.d/vmware-tools.repo
+	echo "baseurl=http://packages.vmware.com/tools/esx/latest/rhel6/x86_64">>/etc/yum.repos.d/vmware-tools.repo
+	echo "enabled=1">>/etc/yum.repos.d/vmware-tools.repo
+	echo "gpgcheck=1">>/etc/yum.repos.d/vmware-tools.repo
+	yum install -y vmware-tools-esx-kmods.x86_64 vmware-tools-esx-nox.x86_64
+
+Please note that installing the VMware Tools can take several minutes.
+* Take VM snapshot
+
+Now that the VMware Tools are installed we can remotely power-off the VM via PowerCLI
+
+	Snapshot-VM -VM "ZOL_CentOS"
+   
+* Install ZFS prerequisites
 * Install ZFS
-* Remove unnecessary packages
+
+    `http://zfsonlinux.org/epel.html`
+    `yum localinstall --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release-1-3.el6.noarch.rpm`  
+    `yum install -y zfs`
+
+* Remove any unnecessary packages
 * Create vdev file
 * Create main storage pool
 * Create ZIL and L2ARC
