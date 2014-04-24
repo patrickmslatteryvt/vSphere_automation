@@ -445,7 +445,7 @@ config:
 * Create main storage pool
 
 At this point we can finally create our ZS file system and mount it.
-Here I'm going to create RAID 10 set from the 8 disks on HBA #1 and mount it at /srv, by default there is nothing in the /srv directory on a RHEL or CentOS system.
+Here I'm going to create a RAID 10 set from the 8 disks on HBA #1 and mount it at /srv, by default there is nothing in the /srv directory on a RHEL or CentOS system.
 ```Shell 
 zpool create -f mypool mirror c1t0d0 c1t1d0 mirror c1t2d0 c1t3d0 mirror c1t4d0 c1t5d0 mirror c1t6d0 c1t8d0 -m /srv
 
@@ -476,7 +476,7 @@ pool        alloc   free   read  write   read  write
 ----------  -----  -----  -----  -----  -----  -----
 mypool       166K  39.7G      1     33  1.69K  34.8K
 ```
-If we don't use the -f (force) switch the operation will typically error out due to the disks not being completly blank, it would seem that CentOS writes some sort of marker bytes to the disk during install.
+If we don't use the -f (force) switch the operation will typically error out due to the disks not being completely blank, it would seem that CentOS writes some sort of marker bytes to the disk during install.
 
 If I wanted a RAIDZ (RAID5 - single parity disk) array instead I'd run:
 ```Shell
@@ -544,11 +544,87 @@ zpool destroy -f mypool
 * Create the ZIL and L2ARC
 
 For this test system I'm going to share a pair of virtual 8GB SSDs between the ZIL and the L2ARC. This isn't a configuration that you would ever want to use in a production environment as the ZIL and L2ARC have very different use cases.
-Ideally you want a write intensive, very low latency device as the ZIL, the [ZeusRAM][5] drive is an ideal enterprise level production device for a ZIL.
-For the L2ARC, a read intensive, high IOPS device such as one one of the Intel DC SSDs is ideal.
-For our test purposes though a dedicated set of SSDs is unnecessary. ZFS will allow us to place the ZIL and L2ARC on different partitions of the same SSD devices. In this configuration we'll be mirroring the ZIL and striping the L2ARC. Again this isn't a configuration that you would ever want to use in a production environment. I've seen varying opinions on the benefit of mirroring the ZIL but the consensus seems to come down of the side of mirroring the ZIL is a best practice. The ZIL is essentially a 10 second write cache for all disk activity so that ZFS can delay and re-order writes to the hard disks to make any writes as fast as possible. AFAIK the contents of the ZIL are in RAM as well so losing the ZIL isn't critical unless you have a power failure as well. In that case you could possibly have a serious problem. 
-The L2ARC is a read cache and if it goes offline it will simply be bypassed. Not having it available simply means having only the primary ARC cache in RAM to work from. Since an SSD is about two orders of magnitude faster than a hard disk (25µs SSD vs. 5ms HDD) you want to cache as much as possible on the SSD, particularly if you don't have vast amount of RAM to allocate to the ARC cache.
+
+Ideally you want a small capacity, write intensive, very low latency device as the ZIL, the [ZeusRAM][5] drive is an ideal enterprise level production device for a ZIL.
+
+For the L2ARC, a large capacity, read intensive, low latency and high IOPS device such as one of the Intel DC series SSDs is ideal.
+
+For our test purposes though a dedicated set of SSDs is unnecessary. ZFS will allow us to place the ZIL and L2ARC on different partitions of the same SSD devices. In this configuration we'll be mirroring the ZIL and striping the L2ARC. Again this isn't a configuration that you would ever want to use in a production environment. I've seen varying opinions on the benefit of mirroring the ZIL but the consensus seems to come down of the side of mirroring the ZIL is a best practice. The ZIL is essentially a 10 second write cache for all disk activity so that ZFS can delay and re-order writes to the hard disks to make any writes as fast as possible. AFAIK the contents of the ZIL are in RAM as well so losing the ZIL isn't critical unless you have a power failure as well. In that case you could possibly have a serious problem.
  
+The L2ARC is a read cache and if it goes offline it will simply be bypassed. Not having it available simply means having only the primary ARC cache in RAM to work from. Since an SSD is about two orders of magnitude faster than a hard disk (25µs SSD vs. 5ms HDD) you want to cache as much as possible on the SSD, particularly if you don't have vast amount of RAM to allocate to the ARC cache.
+
+First we'll set the SSDs to have a GPT partitioning scheme which is what ZFS uses.
+```Shell
+parted -s /dev/disk/by-vdev/c2t0d0 mklabel gpt
+parted -s /dev/disk/by-vdev/c2t1d0 mklabel gpt
+```
+
+Next we'll carve up the disks into two partitions each, the first 15% going to the ZIL and the rest being allocated to the L2ARC. The ZIL only needs to be as big as 10 seconds of write throughput on your system so it can be pretty small. In a production environment an 8GB ZIL is quite adequate for most cases.
+```Shell
+# ZIL
+parted /dev/disk/by-vdev/c2t0d0 mkpart primary 0% 15%
+parted /dev/disk/by-vdev/c2t1d0 mkpart primary 0% 15%
+# L2ARC
+parted /dev/disk/by-vdev/c2t0d0 mkpart primary 15% 100%
+parted /dev/disk/by-vdev/c2t1d0 mkpart primary 15% 100%
+
+[root@localhost ~]# parted -l
+Model: VMware Virtual disk (scsi)
+Disk /dev/sdj: 8590MB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Number  Start   End     Size    File system  Name     Flags
+ 1      1049kB  1289MB  1288MB               primary
+ 2      1289MB  8589MB  7300MB               primary
+
+Model: VMware Virtual disk (scsi)
+Disk /dev/sdk: 8590MB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Number  Start   End     Size    File system  Name     Flags
+ 1      1049kB  1289MB  1288MB               primary
+ 2      1289MB  8589MB  7300MB               primary
+```
+
+Now we can add the ZIL and L2ARC partitions to our pool
+```Shell
+# Add a mirrored ZIL
+zpool add mypool log mirror c2t0d0-part1 c2t1d0-part1
+
+# Add L2ARC devices (Does not need to be mirrored, L2ARC will be ignored if a device fails - at the cost of cache hits dropping to 0%)
+zpool add mypool cache c2t0d0-part2
+zpool add mypool cache c2t1d0-part2
+
+[root@localhost ~]# zpool status
+  pool: mypool
+ state: ONLINE
+  scan: none requested
+config:
+        NAME              STATE     READ WRITE CKSUM
+        mypool            ONLINE       0     0     0
+          mirror-0        ONLINE       0     0     0
+            c1t0d0        ONLINE       0     0     0
+            c1t1d0        ONLINE       0     0     0
+          mirror-1        ONLINE       0     0     0
+            c1t2d0        ONLINE       0     0     0
+            c1t3d0        ONLINE       0     0     0
+          mirror-2        ONLINE       0     0     0
+            c1t4d0        ONLINE       0     0     0
+            c1t5d0        ONLINE       0     0     0
+          mirror-3        ONLINE       0     0     0
+            c1t6d0        ONLINE       0     0     0
+            c1t8d0        ONLINE       0     0     0
+        logs
+          mirror-4        ONLINE       0     0     0
+            c2t0d0-part1  ONLINE       0     0     0
+            c2t1d0-part1  ONLINE       0     0     0
+        cache
+          c2t0d0-part2    ONLINE       0     0     0
+          c2t1d0-part2    ONLINE       0     0     0
+errors: No known data errors
+```
+
+
 * Add pool scrub cron job
 * ZFS tweaks
 * Notes on what *not* to do.
