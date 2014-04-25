@@ -5,42 +5,43 @@ ZFS on Linux (ZOL)
 I absolutely do not recommend using ZFS as a guest file-system inside a virtual infrastructure of any type for anything other than test purposes.
 ZFS belongs running directly on the hardware at the host OS or hypervisor level.**
 
-**Purpose:**
-
-Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for testing purposes.
-
+* [Purpose](#purpose)
+* [Requirements](#requirements)
 * [Provision VM using PowerCLI](#provision-vm-using-powercli)
 * [Configure BIOS settings](#configure-bios-settings)
 * [Kickstart the OS install](#kickstart-the-os-install)
 * [Install yum updates](#install-yum-updates)
 * [Install htop](#install-htop)
-* [Install VMware Tools](#vmtools)
-* [Take VM snapshot](#vmsnapshot)
-* [Install ZFS prerequisites](#zfsprereq)
-* [Install ZFS](#installzfs)
+* [Install VMware Tools](#install-vmware-tools)
+* [Take VM snapshot](#take-vm-snapshot)
+* [Install ZFS prerequisites](#install-zfs-prerequisites)
+* [Install ZFS](#install-zfs)
 * [Test](#test)
-* [Remove any unnecessary packages](#unnecessary)
-* [Create vdev file](#vdev)
+* [Remove any unnecessary packages](#remove-any-unnecessary-packages)
+* [Create vdev file](#create-vdev-file)
 * [Create main storage pool](#create-main-storage-pool)
     * [Mirrored](#mirrored)
     * [RAIDZ1](#raidz1)
     * [RAIDZ2](#raidz2)
-* [Create the ZIL and L2ARC](#createzil)
-* [Add a zpool scrub cron job](#scrub)
-* [ZFS tweaks](#tweaks)
-* [Some throughput testing](#throughput)
-* [Create additional file-systems and share them](#file-systems)
-* [Automatic ZFS snapshots](#autosnapshots)
-* [Notes on what not to do.](#not)
-* [Future work](#future)
+* [Create the ZIL and L2ARC](#create-the-zil-and-l2arc)
+* [Add a zpool scrub cron job](#add-a-zpool-scrub-cron-job)
+* [ZFS tweaks](#zfs-tweaks)
+* [Some throughput testing](#some-throughput-testing)
+* [Create additional file-systems and share them](#create-additional-file-systems-and-share-them)
+* [Automatic ZFS snapshots](#automatic-zfs-snapshots)
+* [Notes on what not to do](#notes-on-what-not-to-do)
+* [Future work](#future-work)
 * [References](#references)
 
+## Purpose:
+Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for testing purposes.
 
+## Requirements:
 Create a vSphere VM to test our ZOL setup in. Requires a vSphere infrastructure with PowerCLI installed on your client.
 I tested with vSphere v5.5 on my server and with PowerCLI v5.5 and PowerGUI v3.8 on my client.
 
-### Provision VM using PowerCLI
 
+## Provision VM using PowerCLI
 Copy the contents of:
 
     https://github.com/patrickmslatteryvt/vSphere_automation/tree/master/vsphere_functions
@@ -61,11 +62,10 @@ Save and run the script.
 
 Assuming you have no errors during the VM creation you will end up with a new vSphere VM ready to be booted up and have CentOS v6.5 installed on it.
 
-### Configure BIOS settings
-
 ![Provisioned VM in vSphere](images/01_VM_provisioned.png?raw=true "Provisioned VM in vSphere")
 ![Provisioned VM properties](images/01_VM_properties.png?raw=true "Provisioned VM properties")
 
+## Configure BIOS settings
 Next we'll start the VM and disable the unnecessary components such as the floppy, serial and parallel ports and set the correct boot order.
 I haven't figured out a way to do this programatically in vSphere so we'll have to do it manually. In a production environment you would have a template with these features disabled as your baseline.
 
@@ -101,8 +101,7 @@ Save all of our BIOS changes and exit.
 
 ![Save setup and exit](images/09_BIOS.png?raw=true "Save setup and exit")
 
-### Kickstart the OS install
-
+## Kickstart the OS install
 Since the CentOS v6.5 ISO is already attached the VM will now boot to the CentOS install screen.
 
 Press **TAB** to edit the default install switches.
@@ -129,8 +128,7 @@ Run **ifconfig** to determine your IP address and then use this IP to SSH into t
 
 *Note that creating a DHCP reservation for your VM is the ideal way to set this up*
 
-### Install yum updates
-
+## Install yum updates
 ```Shell
 yum update -y
 ```
@@ -139,14 +137,12 @@ yum update -y
 yum install -y openssh-clients
 ```
 
-### Install htop
-
+## Install htop
 ```Shell
 rpm -Uhv http://pkgs.repoforge.org/htop/htop-1.0.2-1.el6.rf.x86_64.rpm 
 ```
 
-### Install VMware Tools
-
+## Install VMware Tools
 ```Shell
 rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub
 rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub
@@ -160,20 +156,17 @@ yum install -y vmware-tools-esx-kmods.x86_64 vmware-tools-esx-nox.x86_64
 
 Please note that installing the VMware Tools can take several minutes.
 
-### Take VM snapshot 
-
+## Take VM snapshot 
 Now that the VMware Tools are installed we can remotely power-off the VM via PowerCLI so that we can take an at-rest snapshot that we can use to quickly restore to during our testing.
 
 ```PowerShell
 Snapshot-VM -VM "ZOL_CentOS"
 ```
    
-<h3 id="zfsprereq">Install ZFS prerequisites</h3>
-
+## Install ZFS prerequisites
 Nothing to do at this time.
 
-<h3 id="installzfs">Install ZFS</h3>
-
+## Install ZFS
 From: http://zfsonlinux.org/epel.html
 ```Shell
 yum localinstall -y --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release-1-3.el6.noarch.rpm
@@ -407,8 +400,7 @@ Dependency Installed:
 Complete!
 ```
 
-<h3 id="test">Test</h3>
-
+## Test
 To see if ZFS is working run:
 ```Shell
 [root@localhost ~]# lsmod|grep zfs
@@ -424,12 +416,10 @@ no pools available
 ```
 As long as you get some zfs modules listed then it's working.
 
-<h3 id="unnecessary">Remove any unnecessary packages</h3>
-
+## Remove any unnecessary packages
 Need to build RPMs at some point as if we remove gcc for instance, spl and zfs will go with it.
 
-<h3 id="vdev">Create vdev file</h3>
-
+## Create vdev file
 If you more than a few (2?) disks allocated to your ZFS pool it's highly recommended to use a location to disk ID mapping file so that your ZFS pool will still work if you decide to pull out all the disks and put them back in again in a slightly different order.
 There are some sample mapping files available in the /etc/zfs/ directory.
 I wrote a quick and dirty Bash script that you can use to generate the vdev file.
@@ -484,11 +474,10 @@ config:
             sdj1    FAULTED      0     0     0  corrupted data
 ```
 
-<h3 id="zpool">Create main storage pool</h3>
-
-<h4 id="mirrored">Mirrored</h4>
-
+## Create main storage pool
 At this point we can finally create our ZS file system and mount it.
+
+### Mirrored
 Here I'm going to create a RAID 10 set from the 8 disks on HBA #1 and mount it at /srv, by default there is nothing in the /srv directory on a RHEL or CentOS system.
 ```Shell 
 zpool create -f mypool mirror c1t0d0 c1t1d0 mirror c1t2d0 c1t3d0 mirror c1t4d0 c1t5d0 mirror c1t6d0 c1t8d0 -m /srv
@@ -522,8 +511,7 @@ mypool       166K  39.7G      1     33  1.69K  34.8K
 ```
 If we don't use the -f (force) switch the operation will typically error out due to the disks not being completely blank, it would seem that CentOS writes some sort of marker bytes to the disk during install.
 
-<h4 id="raidz1">RAIDZ1</h4>
-
+### RAIDZ1
 If I wanted a RAIDZ (RAID5 - single parity disk) array instead I'd run:
 ```Shell
 zpool create -f mypool raidz c1t0d0 c1t1d0 c1t2d0 c1t3d0 c1t4d0 c1t5d0 c1t6d0 c1t8d0 -m /srv
@@ -553,8 +541,7 @@ pool        alloc   free   read  write   read  write
 mypool       225K  79.5G      0      4    237  3.92K
 ```
 
-<h4 id="raidz2">RAIDZ2</h4>
-
+### RAIDZ2
 If I wanted a RAIDZ2 (RAID6 - dual parity disks) array I'd run:
 ```Shell
 zpool create -f mypool raidz2 c1t0d0 c1t1d0 c1t2d0 c1t3d0 c1t4d0 c1t5d0 c1t6d0 c1t8d0 -m /srv
@@ -590,8 +577,7 @@ Hint: To completely remove a pool use the command:
 zpool destroy -f mypool
 ```
  
-<h3 id="createzil">Create the ZIL and L2ARC</h3>
-
+## Create the ZIL and L2ARC
 For this test system I'm going to share a pair of virtual 8GB SSDs between the ZIL and the L2ARC. This isn't a configuration that you would ever want to use in a production environment as the ZIL and L2ARC have very different use cases.
 
 Ideally you want a small capacity, write intensive, very low latency device as the ZIL, the [ZeusRAM][5] drive is an ideal enterprise level production device for a ZIL.
@@ -674,8 +660,7 @@ errors: No known data errors
 ```
 
 
-<h3 id="scrub">Add a zpool scrub cron job</h3>
-
+## Add a zpool scrub cron job
 The simplest way to check the data integrity of the ZFS filesystem is to initiate an explicit scrubbing of all data within the pool. This operation traverses all the data in the pool once and verifies that all blocks can be read.
 Running a scrub weekly is highly recommended. Here is a simple Bash script to write a **new** crontab file for the root user. (It should go without saying that you should not use this on a production system!)
 
@@ -697,8 +682,7 @@ rm -f ${TMP_CRONTAB}
 ```
 For more information see: [Checking ZFS File System Integrity][6]
 
-<h3 id="tweaks">ZFS tweaks</h3>
-
+## ZFS tweaks
 In ZFS data integrity comes first, speed is secondary. That said its speed in a properly designed system is very impressive. There just isn't much need to tweak it out of the box.
 That said if you really want to tweak it you can get a list of the available properties by running:
 ```Shell
@@ -710,8 +694,7 @@ zfs set atime=off mypool
 ```
 For more information see: [ZFS Evil Tuning Guide][7]
 
-<h3 id="throughput">Some throughput testing</h3>
-
+## Some throughput testing
 Doing bench-marking in a VM is almost pointless if the VM being tested is sharing resources with other VMs. You can't expect to get consistent numbers in such a setup. In this case we will run some tests to see the difference between having/not having a ZIL or L2ARC. We'll also get a chance to see some of the ZFS admin tools.
 ```Shell
 # Write a 2GB file of zeros to the ZFS pool
@@ -835,10 +818,11 @@ So without the SSD caches in places this test took about three times as long and
 For the urandom test (which I won't illustrate here) it takes about 10% longer but uses about the same amount of CPU power so the CPU based RNG is the real bottleneck in this case.
 
 
-<h3 id="file-systems">Create additional file-systems and share them</h3>
+## Create additional file-systems and share them
+[ ] write this section up
 
-
-<h3 id="autosnapshots">Automatic ZFS snapshots</h3>
+## Automatic ZFS snapshots
+[ ] write this section up
  
 https://github.com/zfsonlinux/zfs-auto-snapshot
 See also:
@@ -849,18 +833,15 @@ wget -O /usr/local/sbin/zfs-auto-snapshot.sh https://raw.github.com/zfsonlinux/z
 chmod +x /usr/local/sbin/zfs-auto-snapshot.sh
 ```
 
-<h3 id="not">Notes on what *not* to do.</h3>
-
+## Notes on what not to do.
   * Make sure not to use the standard /dev/sda /dev/sdb disk identifier convention if using more than 2 disks or you will almost certainly lose all your data.
 
   * Nothing else at this time...
 
-<h3 id="future">Future work</h3>
+## Future work
 	* Make RPMs so we don't have to have the compilers etc. on each machine
 
-
-
-<h3 id="references">References</h3>
+## References
 * [ZOL FAQ][1]
 * [A not so short guide to ZFS on Linux][2]
 * [ZFS Cheatsheet][3]
