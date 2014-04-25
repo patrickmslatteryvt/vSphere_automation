@@ -13,6 +13,7 @@ Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for te
 * [Configure BIOS settings](#configurebios)
 * [Kickstart the OS install](#kickstart)
 * [Install yum updates](#yumupdate)
+* [Install yum updates](#install-yum-updates)
 * [Install htop](#htop)
 * [Install VMware Tools](#vmtools)
 * [Take VM snapshot](#vmsnapshot)
