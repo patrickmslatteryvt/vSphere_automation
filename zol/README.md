@@ -163,7 +163,7 @@ Snapshot-VM -VM "ZOL_CentOS"
    
 * Install ZFS prerequisites
 
-* Install ZFS
+<h3 id="installzfs">Install ZFS</h3>
 
 From: http://zfsonlinux.org/epel.html
 ```Shell
@@ -680,6 +680,7 @@ rm -f ${TMP_CRONTAB}
 For more information see: [Checking ZFS File System Integrity][6]
 
 * ZFS tweaks
+#### ZFS tweaks:
 
 In ZFS data integrity comes first, speed is secondary. That said its speed in a properly designed system is very impressive. There just isn't much need to tweak it out of the box.
 That said if you really want to tweak it you can get a list of the available properties by running:
@@ -849,7 +850,7 @@ chmod +x /usr/local/sbin/zfs-auto-snapshot.sh
 <h3 id="vmtools">Install VMware Tools</h3>
 <h3 id="vmsnapshot">Take VM snapshot</h3>
 <h3 id="zfsprereq">Install ZFS prerequisites</h3>
-<h3 id="installzfs">Install ZFS</h3>
+ <h3 id="installzfs">Install ZFS</h3>
 <h3 id="test">Test</h3>
 <h3 id="unnecessary">Remove any unnecessary packages</h3>
 <h3 id="vdev">Create vdev file</h3>
@@ -859,14 +860,14 @@ chmod +x /usr/local/sbin/zfs-auto-snapshot.sh
  <h4 id="raidz2">RAIDZ2</h4>
 <h3 id="createzil">Create the ZIL and L2ARC</h3>
 <h3 id="scrub">Add a zpool scrub cron job</h3>
-<h3 id="tweaks">ZFS tweaks</h3>
+ <h3 id="tweaks">ZFS tweaks</h3>
 <h3 id="throughput">Some throughput testing</h3>
 <h3 id="file-systems">Create additional file-systems and share them</h3>
 <h3 id="autosnapshots">Automatic ZFS snapshots</h3>
 <h3 id="not">Notes on what not to do.</h3>
 <h3 id="future">Future work</h3>
 
-### References:
+#### References:
 * [ZOL FAQ][1]
 * [A not so short guide to ZFS on Linux][2]
 * [ZFS Cheatsheet][3]
