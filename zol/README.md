@@ -9,7 +9,32 @@ ZFS belongs running directly on the hardware at the host OS or hypervisor level.
 
 Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for testing purposes.
 
-##### Step 1:
+* [Provision VM using PowerCLI](#provisionvm)
+* [Configure BIOS settings](#configurebios)
+* [Kickstart the OS install](#kickstart)
+* [Install yum updates](#yumupdate)
+* [Install htop](#htop)
+* [Install VMware Tools](#vmtools)
+* [Take VM snapshot](#vmsnapshot)
+* [Install ZFS prerequisites](#zfsprereq)
+* [Install ZFS](#installzfs)
+* [Test](#test)
+* [Remove any unnecessary packages](#unnecessary)
+* [Create vdev file](#vdev)
+* [Create main storage pool](#zpool)
+    * [Mirrored](#mirrored)
+    * [RAIDZ1](#raidz1)
+    * [RAIDZ2](#raidz2)
+* [Create the ZIL and L2ARC](#createzil)
+* [Add a zpool scrub cron job](#scrub)
+* [ZFS tweaks](#tweaks)
+* [Some throughput testing](#throughput)
+* [Create additional file-systems and share them](#file-systems)
+* [Automatic ZFS snapshots](#autosnapshots)
+* [Notes on what not to do.](#not)
+* [Future work](#future)
+* [References](#references)
+
 
 Create a vSphere VM to test our ZOL setup in. Requires a vSphere infrastructure with PowerCLI installed on your client.
 I tested with vSphere v5.5 on my server and with PowerCLI v5.5 and PowerGUI v3.8 on my client.
@@ -814,6 +839,32 @@ chmod +x /usr/local/sbin/zfs-auto-snapshot.sh
 
 * Future work
 	* Make RPMs so we don't have to have the compilers etc. on each machine
+
+
+<h3 id="provisionvm">Provision VM using PowerCLI</h3>
+<h3 id="configurebios">Configure BIOS settings</h3>
+<h3 id="kickstart">Kickstart the OS install</h3>
+<h3 id="yumupdate">Install yum updates</h3>
+<h3 id="htop">Install htop</h3>
+<h3 id="vmtools">Install VMware Tools</h3>
+<h3 id="vmsnapshot">Take VM snapshot</h3>
+<h3 id="zfsprereq">Install ZFS prerequisites</h3>
+<h3 id="installzfs">Install ZFS</h3>
+<h3 id="test">Test</h3>
+<h3 id="unnecessary">Remove any unnecessary packages</h3>
+<h3 id="vdev">Create vdev file</h3>
+<h3 id="zpool">Create main storage pool</h3>
+ <h4 id="mirrored">Mirrored</h4>
+ <h4 id="raidz1">RAIDZ1</h4>
+ <h4 id="raidz2">RAIDZ2</h4>
+<h3 id="createzil">Create the ZIL and L2ARC</h3>
+<h3 id="scrub">Add a zpool scrub cron job</h3>
+<h3 id="tweaks">ZFS tweaks</h3>
+<h3 id="throughput">Some throughput testing</h3>
+<h3 id="file-systems">Create additional file-systems and share them</h3>
+<h3 id="autosnapshots">Automatic ZFS snapshots</h3>
+<h3 id="not">Notes on what not to do.</h3>
+<h3 id="future">Future work</h3>
 
 ### References:
 * [ZOL FAQ][1]
