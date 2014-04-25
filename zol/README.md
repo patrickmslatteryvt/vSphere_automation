@@ -30,6 +30,7 @@ ZFS belongs running directly on the hardware at the host OS or hypervisor level.
 * [Some throughput testing](#some-throughput-testing)
 * [Create additional file-systems and share them](#create-additional-file-systems-and-share-them)
 * [Automatic ZFS snapshots](#automatic-zfs-snapshots)
+* [Creating RPMs](#creating-rpms)
 * [Notes on what not to do](#notes-on-what-not-to-do)
 * [Future work](#future-work)
 * [References](#references)
@@ -884,6 +885,9 @@ For the urandom test (which I won't illustrate here) it takes about 10% longer b
 ## Create additional file-systems and share them
 - [ ] Write this section up
 
+zfs set sharesmb=on mypool
+- [ ] Not working...
+
 ## Automatic ZFS snapshots
 - [X] How to install from GitHub
 - [ ] How to enable snapshots
@@ -891,7 +895,6 @@ For the urandom test (which I won't illustrate here) it takes about 10% longer b
 - [ ] How to access old snapshots without reverting
 - [ ] How to revert to prior snapshot
 - [ ] Finish writing this section up
-- [ ] a task list item 
 
 From: 
 https://github.com/zfsonlinux/zfs-auto-snapshot
@@ -905,12 +908,7 @@ pushd /tmp/zfs-auto-snapshot-master && sudo make install && popd && rm -rf /tmp/
 See also:
 https://github.com/mk01/zfs-auto-snapshot/tree/master
 
-## Notes on what not to do.
- * Make sure not to use the standard /dev/sda /dev/sdb disk identifier convention if using more than 2 disks or you will almost certainly lose all your data.
-
- * Nothing else at this time...
-
-## Future work
+## Creating RPMs
  * Make RPMs so we don't have to have the compilers etc. on each machine
  * See: http://zfsonlinux.org/generic-rpm.html
 
@@ -930,25 +928,38 @@ cd spl-0.6.2
 ./configure --with-config=user
 make rpm-utils rpm-dkms
 
-# /srv/spl-0.6.2/spl-0.6.2-1.el6.src.rpm
-# /srv/spl-0.6.2/spl-0.6.2-1.el6.x86_64.rpm
-# /srv/spl-0.6.2/spl-debuginfo-0.6.2-1.el6.x86_64.rpm
-# /srv/spl-0.6.2/spl-dkms-0.6.2-1.el6.noarch.rpm
-# /srv/spl-0.6.2/spl-dkms-0.6.2-1.el6.src.rpm
-
 cd ../zfs-0.6.2
 ./configure --with-config=user
 make rpm-utils rpm-dkms
-
-# /srv/zfs-0.6.2/zfs-0.6.2-1.el6.src.rpm
-# /srv/zfs-0.6.2/zfs-0.6.2-1.el6.x86_64.rpm
-# /srv/zfs-0.6.2/zfs-debuginfo-0.6.2-1.el6.x86_64.rpm
-# /srv/zfs-0.6.2/zfs-devel-0.6.2-1.el6.x86_64.rpm
-# /srv/zfs-0.6.2/zfs-dkms-0.6.2-1.el6.noarch.rpm
-# /srv/zfs-0.6.2/zfs-dkms-0.6.2-1.el6.src.rpm
-# /srv/zfs-0.6.2/zfs-dracut-0.6.2-1.el6.x86_64.rpm
-# /srv/zfs-0.6.2/zfs-test-0.6.2-1.el6.x86_64.rpm
 ```
+
+Installing on another system:
+```Shell
+GITHUB_OAUTH_KEY=f296c0f531640d3ddbbf273c1b169b599fea097d
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/spl-0.6.2-1.el6.x86_64.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/spl-dkms-0.6.2-1.el6.noarch.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-0.6.2-1.el6.x86_64.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-dkms-0.6.2-1.el6.noarch.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-dracut-0.6.2-1.el6.x86_64.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-test-0.6.2-1.el6.x86_64.rpm
+
+yum localinstall 
+spl-0.6.2-1.el6.x86_64.rpm \
+spl-dkms-0.6.2-1.el6.noarch.rpm \
+zfs-0.6.2-1.el6.x86_64.rpm \
+zfs-dkms-0.6.2-1.el6.noarch.rpm \
+zfs-dracut-0.6.2-1.el6.x86_64.rpm \
+zfs-test-0.6.2-1.el6.x86_64.rpm \
+
+```
+
+## Notes on what not to do.
+ * Make sure not to use the standard /dev/sda /dev/sdb disk identifier convention if using more than 2 disks or you will almost certainly lose all your data.
+
+ * Nothing else at this time...
+
+## Future work
+* ???
 
 ## References
 * [ZOL FAQ][1]
