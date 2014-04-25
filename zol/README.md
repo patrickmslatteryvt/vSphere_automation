@@ -106,13 +106,16 @@ Since the CentOS v6.5 ISO is already attached the VM will now boot to the CentOS
 
 Press **TAB** to edit the default install switches.
 
-Here we'll point the VM at a web server that hosts the file https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/zol.ks to use as the kickstart file. I used an Nginx instance running on my DHCP server. Almost any HTTP server will work though, just make sure that you can download the .ks file without any errors. A default IIS 7 instance won't allow this for instance.
+Here we'll point the VM at a web server that hosts the file `https://github.com/patrickmslatteryvt/vSphere_automation/blob/master/zol/zol.ks` to use as the kickstart file. I used an Nginx instance running on my DHCP server. Almost any HTTP server will work though, just make sure that you can download the .ks file without any errors. A default IIS 7 instance won't allow this for instance.
 
 ![Kickstart settings](images/10_kickstart.png?raw=true "Kickstart settings")
 
 *Note that my DHCP/HTTP server is called "kicker" and the kickstart file is in a sub-directory named "/ks"*
+Please note that we could have used an FTP or NFS server or a floppy or USB device to feed the kickstart file to the installer. I simply find a HTTP server to be simpler. If you have an SVN server that allows anonymous HTTP access or a Perforce server with P4Web installed you could put the kickstart file there and keep it under version control. You could probably do the same with GitHub...
+See: http://fedoraproject.org/wiki/Anaconda/Kickstart#How_Do_You_Perform_a_Kickstart_Installation.3F
+ 
 
-OS install in progress, the install should take only 5 minutes or so.
+Here we see the OS install in progress, the install should take only 5 minutes or so.
 **NEED: WHAT IF KICKSTART FILE CAN'T BE FOUND?**
 ![CentOS install progress](images/11_OS_install.png?raw=true "CentOS install progress")
 
@@ -156,8 +159,12 @@ Please note that installing the VMware Tools can take several minutes.
 Now that the VMware Tools are installed we can remotely power-off the VM via PowerCLI so that we can take an at-rest snapshot that we can use to quickly restore to during our testing.
 
 ```PowerShell
-Snapshot-VM -VM "ZOL_CentOS"
+~~Snapshot-VM -VM "ZOL_CentOS"~~
 ```
+Need to fix this PS function, it's not working right...
+
+We could also use the vCLI from another Linux system...
+https://my.vmware.com/web/vmware/details?downloadGroup=VSP510-VCLI-510&productId=285
    
 ## Install ZFS prerequisites
 Nothing to do at this time.
@@ -168,7 +175,64 @@ From: http://zfsonlinux.org/epel.html
 yum localinstall -y --nogpgcheck http://archive.zfsonlinux.org/epel/zfs-release-1-3.el6.noarch.rpm
 yum install -y zfs
 ```
-I've found this install errors out on not finding a kernel at times. You should get output something like this:
+I've found this install error out on not finding a kernel at times. In such a case the messages displayed will be like this:
+```Shell
+Running Transaction
+  Installing : kernel-devel-2.6.32-431.11.2.el6.x86_64                                                                                 1/15 
+  Installing : ppl-0.10.2-11.el6.x86_64                                                                                                2/15 
+  Installing : cloog-ppl-0.15.7-1.2.el6.x86_64                                                                                         3/15 
+  Installing : mpfr-2.4.1-6.el6.x86_64                                                                                                 4/15 
+  Installing : cpp-4.4.7-4.el6.x86_64                                                                                                  5/15 
+  Installing : libgomp-4.4.7-4.el6.x86_64                                                                                              6/15 
+  Installing : kernel-headers-2.6.32-431.11.2.el6.x86_64                                                                               7/15 
+  Installing : glibc-headers-2.12-1.132.el6.x86_64                                                                                     8/15 
+  Installing : glibc-devel-2.12-1.132.el6.x86_64                                                                                       9/15 
+  Installing : gcc-4.4.7-4.el6.x86_64                                                                                                 10/15 
+  Installing : dkms-2.2.0.3-14.zfs1.el6.noarch                                                                                        11/15 
+  Installing : spl-dkms-0.6.2-1.el6.noarch                                                                                            12/15 
+Loading new spl-0.6.2 DKMS files...
+First Installation: checking all kernels...
+Building only for 2.6.32-431.el6.x86_64
+Module build for the currently running kernel was skipped since the
+kernel source for this kernel does not seem to be installed.
+  Installing : zfs-dkms-0.6.2-1.el6.noarch                                                                                            13/15 
+Loading new zfs-0.6.2 DKMS files...
+First Installation: checking all kernels...
+Building only for 2.6.32-431.el6.x86_64
+Module build for the currently running kernel was skipped since the
+kernel source for this kernel does not seem to be installed.
+  Installing : spl-0.6.2-1.el6.x86_64                                                                                                 14/15 
+  Installing : zfs-0.6.2-1.el6.x86_64                                                                                                 15/15 
+  Verifying  : zfs-dkms-0.6.2-1.el6.noarch                                                                                             1/15 
+  Verifying  : kernel-headers-2.6.32-431.11.2.el6.x86_64                                                                               2/15 
+  Verifying  : spl-0.6.2-1.el6.x86_64                                                                                                  3/15 
+  Verifying  : cpp-4.4.7-4.el6.x86_64                                                                                                  4/15 
+  Verifying  : glibc-devel-2.12-1.132.el6.x86_64                                                                                       5/15 
+  Verifying  : zfs-0.6.2-1.el6.x86_64                                                                                                  6/15 
+  Verifying  : kernel-devel-2.6.32-431.11.2.el6.x86_64                                                                                 7/15 
+  Verifying  : libgomp-4.4.7-4.el6.x86_64                                                                                              8/15 
+  Verifying  : mpfr-2.4.1-6.el6.x86_64                                                                                                 9/15 
+  Verifying  : spl-dkms-0.6.2-1.el6.noarch                                                                                            10/15 
+  Verifying  : dkms-2.2.0.3-14.zfs1.el6.noarch                                                                                        11/15 
+  Verifying  : gcc-4.4.7-4.el6.x86_64                                                                                                 12/15 
+  Verifying  : ppl-0.10.2-11.el6.x86_64                                                                                               13/15 
+  Verifying  : cloog-ppl-0.15.7-1.2.el6.x86_64                                                                                        14/15 
+  Verifying  : glibc-headers-2.12-1.132.el6.x86_64                                                                                    15/15 
+
+Installed:
+  zfs.x86_64 0:0.6.2-1.el6                                                                                                                  
+
+Dependency Installed:
+  cloog-ppl.x86_64 0:0.15.7-1.2.el6              cpp.x86_64 0:4.4.7-4.el6                         dkms.noarch 0:2.2.0.3-14.zfs1.el6         
+  gcc.x86_64 0:4.4.7-4.el6                       glibc-devel.x86_64 0:2.12-1.132.el6              glibc-headers.x86_64 0:2.12-1.132.el6     
+  kernel-devel.x86_64 0:2.6.32-431.11.2.el6      kernel-headers.x86_64 0:2.6.32-431.11.2.el6      libgomp.x86_64 0:4.4.7-4.el6              
+  mpfr.x86_64 0:2.4.1-6.el6                      ppl.x86_64 0:0.10.2-11.el6                       spl.x86_64 0:0.6.2-1.el6                  
+  spl-dkms.noarch 0:0.6.2-1.el6                  zfs-dkms.noarch 0:0.6.2-1.el6                   
+
+Complete!
+```
+
+You should however get output something like this if everything is working correctly:
 ```Shell
 [root@localhost ~]# yum install -y zfs
 Loaded plugins: fastestmirror, priorities
@@ -827,6 +891,7 @@ For the urandom test (which I won't illustrate here) it takes about 10% longer b
 - [ ] How to access old snapshots without reverting
 - [ ] How to revert to prior snapshot
 - [ ] Finish writing this section up
+- [ ] a task list item 
 
 From: 
 https://github.com/zfsonlinux/zfs-auto-snapshot
@@ -847,6 +912,43 @@ https://github.com/mk01/zfs-auto-snapshot/tree/master
 
 ## Future work
  * Make RPMs so we don't have to have the compilers etc. on each machine
+ * See: http://zfsonlinux.org/generic-rpm.html
+
+```Shell
+cd /srv
+
+sudo yum groupinstall "Development Tools"
+sudo yum install kernel-devel zlib-devel libuuid-devel libblkid-devel libselinux-devel parted lsscsi wget
+
+wget http://archive.zfsonlinux.org/downloads/zfsonlinux/spl/spl-0.6.2.tar.gz
+wget http://archive.zfsonlinux.org/downloads/zfsonlinux/zfs/zfs-0.6.2.tar.gz
+
+tar -xzf spl-0.6.2.tar.gz
+tar -xzf zfs-0.6.2.tar.gz
+
+cd spl-0.6.2
+./configure --with-config=user
+make rpm-utils rpm-dkms
+
+# /srv/spl-0.6.2/spl-0.6.2-1.el6.src.rpm
+# /srv/spl-0.6.2/spl-0.6.2-1.el6.x86_64.rpm
+# /srv/spl-0.6.2/spl-debuginfo-0.6.2-1.el6.x86_64.rpm
+# /srv/spl-0.6.2/spl-dkms-0.6.2-1.el6.noarch.rpm
+# /srv/spl-0.6.2/spl-dkms-0.6.2-1.el6.src.rpm
+
+cd ../zfs-0.6.2
+./configure --with-config=user
+make rpm-utils rpm-dkms
+
+# /srv/zfs-0.6.2/zfs-0.6.2-1.el6.src.rpm
+# /srv/zfs-0.6.2/zfs-0.6.2-1.el6.x86_64.rpm
+# /srv/zfs-0.6.2/zfs-debuginfo-0.6.2-1.el6.x86_64.rpm
+# /srv/zfs-0.6.2/zfs-devel-0.6.2-1.el6.x86_64.rpm
+# /srv/zfs-0.6.2/zfs-dkms-0.6.2-1.el6.noarch.rpm
+# /srv/zfs-0.6.2/zfs-dkms-0.6.2-1.el6.src.rpm
+# /srv/zfs-0.6.2/zfs-dracut-0.6.2-1.el6.x86_64.rpm
+# /srv/zfs-0.6.2/zfs-test-0.6.2-1.el6.x86_64.rpm
+```
 
 ## References
 * [ZOL FAQ][1]
