@@ -108,6 +108,12 @@ yum update -y
 ```Shell
 yum install -y openssh-clients
 ```
+
+* Install htop
+```Shell
+rpm -Uhv http://pkgs.repoforge.org/htop/htop-1.0.2-1.el6.rf.x86_64.rpm 
+```
+
 * Install VMware Tools
 
 ```Shell
@@ -650,19 +656,150 @@ For more information see: [Checking ZFS File System Integrity][6]
 
 * ZFS tweaks
 
-In ZFS data integrity comes first, speed is secondary. That said it's speed in a properly designed system is very impressive. There isn't much need to tweak it out of the box.
-That said you can get a list of the available properties by running:
+In ZFS data integrity comes first, speed is secondary. That said its speed in a properly designed system is very impressive. There just isn't much need to tweak it out of the box.
+That said if you really want to tweak it you can get a list of the available properties by running:
 ```Shell
 zfs get
 ```
-One property that I typically turn off is file access update times. 
+One property that I typically turn off is file access update times.
+```Shell 
 zfs set atime=off mypool
-
+```
 For more information see: [ZFS Evil Tuning Guide][7]
 
+* Some throughput testing
+
+Doing bench-marking in a VM is almost pointless if the VM being tested is sharing resources with other VMs. You can't expect to get consistent numbers in such a setup. In this case we will run some tests to see the difference between having/not having a ZIL or L2ARC. We'll also get a chance to see some of the ZFS admin tools.
+```Shell
+# Write a 2GB file of zeros to the ZFS pool
+dd bs=1M count=2048 if=/dev/zero of=/srv/test_1.dd conv=fdatasync
+2048+0 records in
+2048+0 records out
+2147483648 bytes (2.1 GB) copied, 17.642 s, 122 MB/s
+
+# Write a 2GB file of pseudo-random data to the ZFS pool
+dd bs=1M count=2048 if=/dev/urandom of=/srv/test_2.dd conv=fdatasync
+2048+0 records in
+2048+0 records out
+2147483648 bytes (2.1 GB) copied, 261.021 s, 8.2 MB/s
+```
+If you open two additional ssh consoles to the VM you can watch the CPU and RAM activity with `htop` in one console window and the ZFS IO patterns with `zpool iostat -v 3` in the other console window.
+Here we can see the system activity in htop before we start any tests, we can see that the system is idle and using a minimal amount of RAM (230MB of the 4GB allocated).
+
+![htop before tests](images/14_htop_before.png?raw=true "htop before tests")
+
+```Shell
+                     capacity     operations    bandwidth
+pool              alloc   free   read  write   read  write
+----------------  -----  -----  -----  -----  -----  -----
+mypool            3.86G  35.9G      0    925      0  73.0M
+  mirror           986M  8.97G      0     76      0  7.63M
+    c1t0d0            -      -      0     79      0  8.57M
+    c1t1d0            -      -      0     72      0  7.67M
+  mirror           987M  8.97G      0     63      0  7.82M
+    c1t2d0            -      -      0     64      0  7.70M
+    c1t3d0            -      -      0     65      0  7.82M
+  mirror           988M  8.97G      0     90      0  9.03M
+    c1t4d0            -      -      0     85      0  9.31M
+    c1t5d0            -      -      0     83      0  9.03M
+  mirror           991M  8.97G      0     81      0  7.80M
+    c1t6d0            -      -      0     69      0  7.39M
+    c1t8d0            -      -      0     73      0  7.88M
+logs                  -      -      -      -      -      -
+  mirror           128K  1.19G      0    613      0  40.7M
+    c2t0d0-part1      -      -      0    613      0  40.7M
+    c2t1d0-part1      -      -      0    659      0  43.8M
+cache                 -      -      -      -      -      -
+  c2t0d0-part2    1.55G  5.25G      2    127  1.31K  15.6M
+  c2t1d0-part2    1.55G  5.25G      0    110    167  13.7M
+----------------  -----  -----  -----  -----  -----  -----
+```
+Here we see a fairly typical zpool iostat trace during the write of the zeroed file. We can see that the ZIL (log) drives are adsorbing a 40MBps write rate and the 8 hard drives are taking on another 73MBps write rate. Below we can see the htop graph showing that the CPUs are being saturated and that the RAM is being used up for the ARC cache.
+
+![htop during zero test](images/15_htop_zero.png?raw=true "htop during zero test")
+
+```Shell
+                     capacity     operations    bandwidth
+pool              alloc   free   read  write   read  write
+----------------  -----  -----  -----  -----  -----  -----
+mypool            2.25G  37.5G      0    138    853  11.4M
+  mirror           575M  9.38G      0     24      0  3.00M
+    c1t0d0            -      -      0     25      0  3.00M
+    c1t1d0            -      -      0     25      0  3.00M
+  mirror           575M  9.38G      0     40    853  2.86M
+    c1t2d0            -      -      0     32    853  2.86M
+    c1t3d0            -      -      0     32      0  2.86M
+  mirror           577M  9.37G      0     38      0  2.69M
+    c1t4d0            -      -      0     29      0  2.69M
+    c1t5d0            -      -      0     29      0  2.69M
+  mirror           579M  9.37G      0     34      0  2.85M
+    c1t6d0            -      -      0     30      0  2.85M
+    c1t8d0            -      -      0     30      0  2.85M
+logs                  -      -      -      -      -      -
+  mirror           128K  1.19G      0      0      0      0
+    c2t0d0-part1      -      -      0      0      0      0
+    c2t1d0-part1      -      -      0      0      0      0
+cache                 -      -      -      -      -      -
+  c2t0d0-part2    1.72G  5.08G      0     49    170  6.04M
+  c2t1d0-part2    1.74G  5.06G      2     44  2.17K  5.29M
+----------------  -----  -----  -----  -----  -----  -----
+```
+Here we see a fairly typical zpool iostat trace during the write of the urandom file. We can see that the ZIL (log) drives don't appear to be doing anything (they almost certainly are doing something, we would just need a more frequent sampling rate to see it happening) and the 8 hard drives are taking on another 11MBps write rate. We can see the htop CPU graph below which shows us that the task is bound by the slow speed of the .dev/urandom device.
+Below we can see the htop graph showing that the CPUs are not saturated and that about 2GB of RAM is being used up for the ARC cache.
+
+![htop during urandom test](images/16_htop_urandom.png?raw=true "htop during urandom test")
+
+After the tests have completed we see that the CPUs return to idle but that RAM is still in use for the ARC cache.
+
+![htop after tests](images/17_htop_after.png?raw=true "htop after tests")
+
+If we were to now [remove our ZIL and L2ARC][12] and rerun the same tests we should see very different results.
+
+```Shell
+zpool remove mypool mirror-4
+zpool remove mypool c2t0d0-part2
+zpool remove mypool c2t1d0-part2
+[root@localhost ~]# zpool status
+  pool: mypool
+ state: ONLINE
+  scan: scrub repaired 0 in 0h0m with 0 errors on Thu Apr 24 19:22:51 2014
+config:
+        NAME        STATE     READ WRITE CKSUM
+        mypool      ONLINE       0     0     0
+          mirror-0  ONLINE       0     0     0
+            c1t0d0  ONLINE       0     0     0
+            c1t1d0  ONLINE       0     0     0
+          mirror-1  ONLINE       0     0     0
+            c1t2d0  ONLINE       0     0     0
+            c1t3d0  ONLINE       0     0     0
+          mirror-2  ONLINE       0     0     0
+            c1t4d0  ONLINE       0     0     0
+            c1t5d0  ONLINE       0     0     0
+          mirror-3  ONLINE       0     0     0
+            c1t6d0  ONLINE       0     0     0
+            c1t8d0  ONLINE       0     0     0
+errors: No known data errors
+
+dd bs=1M count=2048 if=/dev/zero of=/srv/test_1.dd conv=fdatasync
+2048+0 records in
+2048+0 records out
+2147483648 bytes (2.1 GB) copied, 53.0516 s, 40.5 MB/s
+```
+So without the SSD caches in places this test took about three times as long and used only about half the available CPU power.
+
+![htop during zero test with no caches](images/18_htop_no_zil_l2arc.png?raw=true "htop during zero test with no caches")
+
+For the urandom test (which I won't illustrate here) it takes about 10% longer but uses about the same amount of CPU power so the CPU based RNG is the real bottleneck in this case.
+
+
+* Create additional file-systems and share them
+
+
 * Automatic snapshots
-* 
+ 
 https://github.com/zfsonlinux/zfs-auto-snapshot
+See also:
+https://github.com/mk01/zfs-auto-snapshot/tree/master
 
 ```Shell
 wget -O /usr/local/sbin/zfs-auto-snapshot.sh https://raw.github.com/zfsonlinux/zfs-auto-snapshot/master/src/zfs-auto-snapshot.sh
@@ -670,8 +807,13 @@ chmod +x /usr/local/sbin/zfs-auto-snapshot.sh
 ```
 
 * Notes on what *not* to do.
-* Future stuff
-	* Make proper RPMs so we don't have to have the compilers etc. on each machine
+
+  * Make sure not to use the standard /dev/sda /dev/sdb disk identifier convention if using more than 2 disks or you will almost certainly lose all your data.
+
+  * Nothing else at this time...
+
+* Future work
+	* Make RPMs so we don't have to have the compilers etc. on each machine
 
 ### References:
 * [ZOL FAQ][1]
@@ -690,6 +832,7 @@ chmod +x /usr/local/sbin/zfs-auto-snapshot.sh
 [7]: http://www.solarisinternals.com/wiki/index.php/ZFS_Evil_Tuning_Guide "ZFS Evil Tuning Guide"
 [8]: http://docs.oracle.com/cd/E23823_01/html/819-5461/preface-1.html#scrolltoc "Oracle Solaris ZFS Administration Guide"
 
-http://constantin.glez.de/blog/2010/04/ten-ways-easily-improve-oracle-solaris-zfs-filesystem-performance
-http://rudd-o.com/linux-and-free-software/tip-letting-your-zfs-pool-sleep
-http://bernaerts.dyndns.org/linux/75-debian/279-debian-wheezy-zfs-raidz-pool
+[9]: http://constantin.glez.de/blog/2010/04/ten-ways-easily-improve-oracle-solaris-zfs-filesystem-performance
+[10]: http://rudd-o.com/linux-and-free-software/tip-letting-your-zfs-pool-sleep
+[11]: http://bernaerts.dyndns.org/linux/75-debian/279-debian-wheezy-zfs-raidz-pool
+[12]: https://blogs.oracle.com/ds/entry/add_and_remove_zils_live "Add And Remove ZILs Live!"
