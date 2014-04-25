@@ -115,6 +115,7 @@ pciutils
 lsof
 patch
 bind-utils # provides nslookup and dig
+openssh-clients
 # Don't install these packages, no need for firmware patches on a VM, gets us down to 240 packages
 -iwl100-firmware
 -netxen-firmware

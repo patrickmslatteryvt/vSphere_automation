@@ -23,6 +23,7 @@ ZFS belongs running directly on the hardware at the host OS or hypervisor level.
     * [Mirrored](#mirrored)
     * [RAIDZ1](#raidz1)
     * [RAIDZ2](#raidz2)
+    * [zpool destroy](#zpool-destroy)
 * [Create the ZIL and L2ARC](#create-the-zil-and-l2arc)
 * [Add a zpool scrub cron job](#add-a-zpool-scrub-cron-job)
 * [ZFS tweaks](#zfs-tweaks)
@@ -34,12 +35,11 @@ ZFS belongs running directly on the hardware at the host OS or hypervisor level.
 * [References](#references)
 
 ## Purpose:
-Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for testing purposes.
+Project to automate the deployment of a ZFS on Linux VM running CentOS v6.5 for testing purposes.
 
 ## Requirements:
-Create a vSphere VM to test our ZOL setup in. Requires a vSphere infrastructure with PowerCLI installed on your client.
+Requires a vSphere infrastructure with PowerCLI installed on your client.
 I tested with vSphere v5.5 on my server and with PowerCLI v5.5 and PowerGUI v3.8 on my client.
-
 
 ## Provision VM using PowerCLI
 Copy the contents of:
@@ -131,10 +131,6 @@ Run **ifconfig** to determine your IP address and then use this IP to SSH into t
 ## Install yum updates
 ```Shell
 yum update -y
-```
-* Install the openssh client which is necessary for rsync (NOTE: Should add this to the kickstart file instead)
-```Shell
-yum install -y openssh-clients
 ```
 
 ## Install htop
@@ -572,6 +568,7 @@ mypool       346K  79.5G      2     41  2.38K  40.3K
 ```
 I'm not sure why a RAIDZ2 pool has the same amount of free space listed as a RAIDZ pool. As I understood it the RAIDZ2 pool should have been at least one disks worth of space less.
 
+### Zpool Destroy
 Hint: To completely remove a pool use the command:
 ```Shell
 zpool destroy -f mypool
@@ -692,6 +689,8 @@ One property that I typically turn off is file access update times.
 ```Shell 
 zfs set atime=off mypool
 ```
+There is no reason to turn dedupe off as you'll see in many other guides as it's off by default in ZOL.
+
 For more information see: [ZFS Evil Tuning Guide][7]
 
 ## Some throughput testing
@@ -819,27 +818,35 @@ For the urandom test (which I won't illustrate here) it takes about 10% longer b
 
 
 ## Create additional file-systems and share them
-[ ] write this section up
+- [ ] Write this section up
 
 ## Automatic ZFS snapshots
-[ ] write this section up
- 
+- [X] How to install from GitHub
+- [ ] How to enable snapshots
+- [ ] How often to snapshot?
+- [ ] How to access old snapshots without reverting
+- [ ] How to revert to prior snapshot
+- [ ] Finish writing this section up
+
+From: 
 https://github.com/zfsonlinux/zfs-auto-snapshot
+
+```Shell
+curl -L https://github.com/zfsonlinux/zfs-auto-snapshot/archive/master.tar.gz | tar xz -C /tmp/
+pushd /tmp/zfs-auto-snapshot-master && sudo make install && popd && rm -rf /tmp/zfs-auto-snapshot-master
+```
+
+
 See also:
 https://github.com/mk01/zfs-auto-snapshot/tree/master
 
-```Shell
-wget -O /usr/local/sbin/zfs-auto-snapshot.sh https://raw.github.com/zfsonlinux/zfs-auto-snapshot/master/src/zfs-auto-snapshot.sh
-chmod +x /usr/local/sbin/zfs-auto-snapshot.sh
-```
-
 ## Notes on what not to do.
-  * Make sure not to use the standard /dev/sda /dev/sdb disk identifier convention if using more than 2 disks or you will almost certainly lose all your data.
+ * Make sure not to use the standard /dev/sda /dev/sdb disk identifier convention if using more than 2 disks or you will almost certainly lose all your data.
 
-  * Nothing else at this time...
+ * Nothing else at this time...
 
 ## Future work
-	* Make RPMs so we don't have to have the compilers etc. on each machine
+ * Make RPMs so we don't have to have the compilers etc. on each machine
 
 ## References
 * [ZOL FAQ][1]
