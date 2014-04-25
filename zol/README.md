@@ -9,12 +9,11 @@ ZFS belongs running directly on the hardware at the host OS or hypervisor level.
 
 Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for testing purposes.
 
-* [Provision VM using PowerCLI](#provisionvm)
-* [Configure BIOS settings](#configurebios)
-* [Kickstart the OS install](#kickstart)
-* [Install yum updates](#yumupdate)
+* [Provision VM using PowerCLI](#provision-vm-using-powercli)
+* [Configure BIOS settings](#configure-bios-settings)
+* [Kickstart the OS install](#kickstart-the-os-install)
 * [Install yum updates](#install-yum-updates)
-* [Install htop](#htop)
+* [Install htop](#install-htop)
 * [Install VMware Tools](#vmtools)
 * [Take VM snapshot](#vmsnapshot)
 * [Install ZFS prerequisites](#zfsprereq)
@@ -40,7 +39,7 @@ Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for te
 Create a vSphere VM to test our ZOL setup in. Requires a vSphere infrastructure with PowerCLI installed on your client.
 I tested with vSphere v5.5 on my server and with PowerCLI v5.5 and PowerGUI v3.8 on my client.
 
-<h3 id="provisionvm">Provision VM using PowerCLI</h3>
+### Provision VM using PowerCLI
 
 Copy the contents of:
 
@@ -62,7 +61,7 @@ Save and run the script.
 
 Assuming you have no errors during the VM creation you will end up with a new vSphere VM ready to be booted up and have CentOS v6.5 installed on it.
 
-<h3 id="configurebios">Configure BIOS settings</h3>
+### Configure BIOS settings
 
 ![Provisioned VM in vSphere](images/01_VM_provisioned.png?raw=true "Provisioned VM in vSphere")
 ![Provisioned VM properties](images/01_VM_properties.png?raw=true "Provisioned VM properties")
@@ -102,7 +101,7 @@ Save all of our BIOS changes and exit.
 
 ![Save setup and exit](images/09_BIOS.png?raw=true "Save setup and exit")
 
-<h3 id="kickstart">Kickstart the OS install</h3>
+### Kickstart the OS install
 
 Since the CentOS v6.5 ISO is already attached the VM will now boot to the CentOS install screen.
 
@@ -130,7 +129,7 @@ Run **ifconfig** to determine your IP address and then use this IP to SSH into t
 
 *Note that creating a DHCP reservation for your VM is the ideal way to set this up*
 
-<h3 id="yumupdate">Install yum updates</h3>
+### Install yum updates
 
 ```Shell
 yum update -y
@@ -140,13 +139,13 @@ yum update -y
 yum install -y openssh-clients
 ```
 
-<h3 id="htop">Install htop</h3>
+### Install htop
 
 ```Shell
 rpm -Uhv http://pkgs.repoforge.org/htop/htop-1.0.2-1.el6.rf.x86_64.rpm 
 ```
 
-<h3 id="vmtools">Install VMware Tools</h3>
+### Install VMware Tools
 
 ```Shell
 rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub
@@ -161,7 +160,7 @@ yum install -y vmware-tools-esx-kmods.x86_64 vmware-tools-esx-nox.x86_64
 
 Please note that installing the VMware Tools can take several minutes.
 
-<h3 id="vmsnapshot">Take VM snapshot</h3> 
+### Take VM snapshot 
 
 Now that the VMware Tools are installed we can remotely power-off the VM via PowerCLI so that we can take an at-rest snapshot that we can use to quickly restore to during our testing.
 
