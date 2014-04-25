@@ -21,7 +21,7 @@ Project to automate the deployment of a ZFS on Linux VM using CentOS v6.5 for te
 * [Test](#test)
 * [Remove any unnecessary packages](#unnecessary)
 * [Create vdev file](#vdev)
-* [Create main storage pool](#zpool)
+* [Create main storage pool](#create-main-storage-pool)
     * [Mirrored](#mirrored)
     * [RAIDZ1](#raidz1)
     * [RAIDZ2](#raidz2)
