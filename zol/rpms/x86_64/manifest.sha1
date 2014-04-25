@@ -1,0 +1,6 @@
+679bd72586744b439574e7d34f69eb4058170bc0  spl-0.6.2-1.el6.x86_64.rpm
+0e016e4291377bd6b72230cd3eca478e91a9bc07  spl-dkms-0.6.2-1.el6.noarch.rpm
+be462cc69501be0e71f81bedd253407254522fb9  zfs-0.6.2-1.el6.x86_64.rpm
+16ebd529d975263a68edaaed634659513be5d8c2  zfs-dkms-0.6.2-1.el6.noarch.rpm
+87c084b103bc663d89a37f65b8a12668b3fc61fd  zfs-dracut-0.6.2-1.el6.x86_64.rpm
+018b17a27063ba4bc80fdcc5ac2d6af7710cc7a5  zfs-test-0.6.2-1.el6.x86_64.rpm

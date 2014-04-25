@@ -936,12 +936,14 @@ make rpm-utils rpm-dkms
 Installing on another system:
 ```Shell
 GITHUB_OAUTH_KEY=f296c0f531640d3ddbbf273c1b169b599fea097d
-curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/spl-0.6.2-1.el6.x86_64.rpm
-curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/spl-dkms-0.6.2-1.el6.noarch.rpm
-curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-0.6.2-1.el6.x86_64.rpm
-curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-dkms-0.6.2-1.el6.noarch.rpm
-curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-dracut-0.6.2-1.el6.x86_64.rpm
-curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.github.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-test-0.6.2-1.el6.x86_64.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/spl-0.6.2-1.el6.x86_64.rpm -o ~/spl-0.6.2-1.el6.x86_64.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/spl-dkms-0.6.2-1.el6.noarch.rpm -o ~/spl-dkms-0.6.2-1.el6.noarch.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-0.6.2-1.el6.x86_64.rpm -o ~/zfs-0.6.2-1.el6.x86_64.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-dkms-0.6.2-1.el6.noarch.rpm -o ~/zfs-dkms-0.6.2-1.el6.noarch.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-dracut-0.6.2-1.el6.x86_64.rpm -o ~/zfs-dracut-0.6.2-1.el6.x86_64.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/zfs-test-0.6.2-1.el6.x86_64.rpm -o ~/zfs-test-0.6.2-1.el6.x86_64.rpm
+curl -L -u ${GITHUB_OAUTH_KEY}:x-oauth-basic https://raw.githubusercontent.com/patrickmslatteryvt/vSphere_automation/master/zol/rpms/x86_64/manifest.sha1 -o ~/manifest.sha1
+sha1sum -c ~/manifest.sha1
 
 yum localinstall 
 spl-0.6.2-1.el6.x86_64.rpm \
