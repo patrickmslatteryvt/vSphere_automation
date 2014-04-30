@@ -768,13 +768,11 @@ For more information see: [ZFS Evil Tuning Guide][7]
 ## Some throughput testing
 Doing bench-marking in a VM is almost pointless if the VM being tested is sharing resources with other VMs. You can't expect to get consistent numbers in such a setup. In this case we will run some tests to see the difference between having/not having a ZIL or L2ARC. We'll also get a chance to see some of the ZFS admin tools.
 ```Shell
-### Write a 2GB file of zeros to the ZFS pool
 dd bs=1M count=2048 if=/dev/zero of=/srv/test_1.dd conv=fdatasync
 2048+0 records in
 2048+0 records out
 2147483648 bytes (2.1 GB) copied, 17.642 s, 122 MB/s
 
-### Write a 2GB file of pseudo-random data to the ZFS pool
 dd bs=1M count=2048 if=/dev/urandom of=/srv/test_2.dd conv=fdatasync
 2048+0 records in
 2048+0 records out
@@ -784,6 +782,8 @@ If you open two additional ssh consoles to the VM you can watch the CPU and RAM 
 Here we can see the system activity in htop before we start any tests, we can see that the system is idle and using a minimal amount of RAM (230MB of the 4GB allocated).
 
 ![htop before tests](images/14_htop_before.png?raw=true "htop before tests")
+
+### Write a 2GB file of zeros to the ZFS pool
 
 ```Shell
                      capacity     operations    bandwidth
@@ -814,6 +814,8 @@ cache                 -      -      -      -      -      -
 Here we see a fairly typical zpool iostat trace during the write of the zeroed file. We can see that the ZIL (log) drives are adsorbing a 40MBps write rate and the 8 hard drives are taking on another 73MBps write rate. Below we can see the htop graph showing that the CPUs are being saturated and that the RAM is being used up for the ARC cache.
 
 ![htop during zero test](images/15_htop_zero.png?raw=true "htop during zero test")
+
+### Write a 2GB file of pseudo-random data to the ZFS pool
 
 ```Shell
                      capacity     operations    bandwidth
