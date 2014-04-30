@@ -34,6 +34,7 @@ ZFS belongs running directly on the hardware at the host OS or hypervisor level.
 * [Some throughput testing](#some-throughput-testing)
     * [Write a 2GB file of zeros to the ZFS pool](#write-a-2gb-file-of-zeros-to-the-zfs-pool)
     * [Write a 2GB file of pseudo-random data to the ZFS pool](#write-a-2gb-file-of-pseudo-random-data-to-the-zfs-pool)
+	* [Remove the ZIL and L2ARC and retest](#remove-the-zil-and-l2arc-and-retest)
 * [Create additional file-systems and share them](#create-additional-file-systems-and-share-them)
 * [Automatic ZFS snapshots](#automatic-zfs-snapshots)
 * [Creating RPMs](#creating-rpms)
@@ -852,6 +853,8 @@ After the tests have completed we see that the CPUs return to idle but that RAM 
 
 ![htop after tests](images/17_htop_after.png?raw=true "htop after tests")
 
+### Remove the ZIL and L2ARC and retest
+
 If we were to now [remove our ZIL and L2ARC][12] and rerun the same tests we should see very different results.
 
 ```Shell
@@ -920,6 +923,7 @@ https://github.com/mk01/zfs-auto-snapshot/tree/master
 ## Creating RPMs
  * Make RPMs so we don't have to have the compilers etc. on each machine
  * See: http://zfsonlinux.org/generic-rpm.html
+ - [ ] Not working... missing one RPM, need to update.
 
 ```Shell
 cd /srv
