@@ -25,9 +25,15 @@ ZFS belongs running directly on the hardware at the host OS or hypervisor level.
     * [RAIDZ2](#raidz2)
     * [zpool destroy](#zpool-destroy)
 * [Create the ZIL and L2ARC](#create-the-zil-and-l2arc)
+    * [ZIL Partition](#zil-partition)
+    * [L2ARC Partition](#l2arc-partition)
+    * [Add a mirrored ZIL](#add-a-mirrored-zil)
+    * [Add L2ARC devices](#add-l2arc-devices)
 * [Add a zpool scrub cron job](#add-a-zpool-scrub-cron-job)
 * [ZFS tweaks](#zfs-tweaks)
 * [Some throughput testing](#some-throughput-testing)
+    * [Write a 2GB file of zeros to the ZFS pool](#write-a-2gb-file-of-zeros-to-the-zfs-pool)
+    * [Write a 2GB file of pseudo-random data to the ZFS pool](#write-a-2gb-file-of-pseudo-random-data-to-the-zfs-pool)
 * [Create additional file-systems and share them](#create-additional-file-systems-and-share-them)
 * [Automatic ZFS snapshots](#automatic-zfs-snapshots)
 * [Creating RPMs](#creating-rpms)
@@ -658,10 +664,10 @@ parted -s /dev/disk/by-vdev/c2t1d0 mklabel gpt
 
 Next we'll carve up the disks into two partitions each, the first 15% going to the ZIL and the rest being allocated to the L2ARC. The ZIL only needs to be as big as 10 seconds of write throughput on your system so it can be pretty small. In a production environment an 8GB ZIL is quite adequate for most cases.
 ```Shell
-# ZIL
+### ZIL Partition
 parted /dev/disk/by-vdev/c2t0d0 mkpart primary 0% 15%
 parted /dev/disk/by-vdev/c2t1d0 mkpart primary 0% 15%
-# L2ARC
+### L2ARC Partition
 parted /dev/disk/by-vdev/c2t0d0 mkpart primary 15% 100%
 parted /dev/disk/by-vdev/c2t1d0 mkpart primary 15% 100%
 
@@ -685,10 +691,11 @@ Number  Start   End     Size    File system  Name     Flags
 
 Now we can add the ZIL and L2ARC partitions to our pool
 ```Shell
-# Add a mirrored ZIL
+### Add a mirrored ZIL
 zpool add mypool log mirror c2t0d0-part1 c2t1d0-part1
 
-# Add L2ARC devices (Does not need to be mirrored, L2ARC will be ignored if a device fails - at the cost of cache hits dropping to 0%)
+### Add L2ARC devices
+(Does not need to be mirrored, L2ARC will be ignored if a device fails - at the cost of cache hits dropping to 0%)
 zpool add mypool cache c2t0d0-part2
 zpool add mypool cache c2t1d0-part2
 
@@ -761,13 +768,13 @@ For more information see: [ZFS Evil Tuning Guide][7]
 ## Some throughput testing
 Doing bench-marking in a VM is almost pointless if the VM being tested is sharing resources with other VMs. You can't expect to get consistent numbers in such a setup. In this case we will run some tests to see the difference between having/not having a ZIL or L2ARC. We'll also get a chance to see some of the ZFS admin tools.
 ```Shell
-# Write a 2GB file of zeros to the ZFS pool
+### Write a 2GB file of zeros to the ZFS pool
 dd bs=1M count=2048 if=/dev/zero of=/srv/test_1.dd conv=fdatasync
 2048+0 records in
 2048+0 records out
 2147483648 bytes (2.1 GB) copied, 17.642 s, 122 MB/s
 
-# Write a 2GB file of pseudo-random data to the ZFS pool
+### Write a 2GB file of pseudo-random data to the ZFS pool
 dd bs=1M count=2048 if=/dev/urandom of=/srv/test_2.dd conv=fdatasync
 2048+0 records in
 2048+0 records out
